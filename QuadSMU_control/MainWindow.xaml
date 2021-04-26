@@ -40,7 +40,7 @@
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="J-V scan">
-                    <Fluent:Button  Header="Change scan parameters"/>
+                    <Fluent:Button  Header="Change scan parameters" Margin="0,-15,0,0"/>
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="Stability parameters">
@@ -69,8 +69,14 @@
                     </Grid>
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="Timing">
+                <Fluent:RibbonGroupBox Header="Stability control" Width="100" HorizontalContentAlignment="Center">
+                    <Grid VerticalAlignment="Center" MinHeight="120">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
+                        <Fluent:Button Grid.Row="0" Click="run_stability_button" Header="Run" FontSize="20" VerticalAlignment="Center" Margin="0,0,0,20"/>
+                    </Grid>
                 </Fluent:RibbonGroupBox>
 
             </Fluent:RibbonTabItem>

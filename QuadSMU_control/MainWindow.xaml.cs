@@ -224,7 +224,7 @@ namespace QuadSMU_control
 
         }
 
-        private async Task call_measurement()
+        private async Task<iv_curve> call_measurement(int smu_channel, bool immediate_export)
         {
             iv_curve scan1 = new iv_curve();
 
@@ -271,6 +271,7 @@ namespace QuadSMU_control
             scan1.calc_fill_factor();
             scan1.calc_pce(double.Parse(irradience.Text));
 
+
             updateDatagrid(scan1);
 
             Debug.Print("VOC: {0}, JSC: {1}, FF: {2}, PCE: {3}", scan1.voc, scan1.jsc, scan1.fill_factor, scan1.pce);
@@ -284,6 +285,13 @@ namespace QuadSMU_control
 
             renderTimer.Stop();
 
+            if (immediate_export == true)
+            {
+                // Save JV curve
+                Debug.Print("Data exported");
+            }
+
+            return scan1;
         }
 
         private void connect_serial_port(String com_port)
@@ -439,7 +447,7 @@ namespace QuadSMU_control
             if (!measurement_in_progress)
             {
                 renderTimer.Start();
-                call_measurement();
+                call_measurement(false);
             }
         }
 
@@ -502,6 +510,17 @@ namespace QuadSMU_control
             //IList<String> items = iv_datagrid.SelectedItems.ToString();
 
 
+        }
+
+        private void run_stability_button(object sender, RoutedEventArgs e)
+        {
+            // Start timer
+        }
+
+        void stability_timer_Tick(object sender, EventArgs e)
+        {
+            // Run scheduled measurement for each channel
+            //iv_curve ch1_curve = call_measurement(1, false);
         }
 
 
