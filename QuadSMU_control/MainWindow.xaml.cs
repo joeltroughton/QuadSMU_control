@@ -436,8 +436,10 @@ namespace QuadSMU_control
         private void disconnect_Click(object sender, RoutedEventArgs e)
         {
             //PlotAll();
-            PrintChecked();
+            //PrintChecked();
             //sp.Close();
+
+            Debug.Print("From settings window: {0}", stability_settings.ch1_start_v.Text);
 
         }
 
@@ -599,8 +601,11 @@ namespace QuadSMU_control
             // Apply the hold voltage to the SMU channel in question
         }
 
-
-
+        private void stability_params_button(object sender, RoutedEventArgs e)
+        {
+            stability_settings p = new stability_settings();
+            p.Show();
+        }
     }
 
 

@@ -1,0 +1,212 @@
+﻿<Window x:Class="QuadSMU_control.stability_settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:QuadSMU_control"
+        mc:Ignorable="d"
+        Title="stability_settings" Height="670" Width="300">
+    <Grid>
+        <Border Padding="10" >
+            <ScrollViewer>
+
+                <StackPanel >
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Content="Import parameters" Click="import_parameters_button"/>
+                        <Button Grid.Column="1" Content="Export parameters" Click="export_parameters_button"/>
+                    </Grid>
+
+                    <Button Content="Set all SMU channels to CH1 parameters" Margin="0,10,0,0" Click="set_all_ch1_button"/>
+                    <Button Content="Save settings &amp; exit" Margin="0,10,0,0"/>
+
+
+
+                    <TextBlock Text="Channel 1" Margin="0,10,0,0" FontWeight="Bold"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Start (V)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0" Text="End (V)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="Step (mV)"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="2" Text="Delay (ms)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="2" Text="I limit (mA)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="2" Text="OSR"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="4" Text="Area (cm²)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
+                        <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch1_start_v"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch1_end_v"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch1_step_mv"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch1_delay_ms"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch1_ilim_ma"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch1_osr"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch1_area_cm2"/>
+                        <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch1_polarity_box" SelectedIndex="0"/>
+                        <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch1_hold_box" SelectedIndex="0"/>
+
+                    </Grid>
+
+                    <TextBlock Text="Channel 2" Margin="0,10,0,0" FontWeight="Bold"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Start (V)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0" Text="End (V)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="Step (mV)"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="2" Text="Delay (ms)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="2" Text="I limit (mA)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="2" Text="OSR"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="4" Text="Area (cm²)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
+                        <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch2_start_v"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch2_end_v"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch2_step_mv"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch2_delay_ms"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch2_ilim_ma"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch2_osr"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch2_area_cm2"/>
+                        <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch2_polarity_box" SelectedIndex="0"/>
+                        <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch2_hold_box" SelectedIndex="0"/>
+
+                    </Grid>
+
+                    <TextBlock Text="Channel 3" Margin="0,10,0,0" FontWeight="Bold"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Start (V)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0" Text="End (V)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="Step (mV)"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="2" Text="Delay (ms)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="2" Text="I limit (mA)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="2" Text="OSR"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="4" Text="Area (cm²)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
+                        <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch3_start_v"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch3_end_v"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch3_step_mv"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch3_delay_ms"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch3_ilim_ma"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch3_osr"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch3_area_cm2"/>
+                        <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch3_polarity_box" SelectedIndex="0"/>
+                        <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch3_hold_box" SelectedIndex="0"/>
+
+                    </Grid>
+
+                    <TextBlock Text="Channel 4" Margin="0,10,0,0" FontWeight="Bold"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                            <ColumnDefinition Width ="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                            <RowDefinition Height ="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Start (V)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0" Text="End (V)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="Step (mV)"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="2" Text="Delay (ms)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="2" Text="I limit (mA)"/>
+                        <TextBlock Grid.Column="2" Grid.Row="2" Text="OSR"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="4" Text="Area (cm²)"/>
+                        <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
+                        <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch4_start_v"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch4_end_v"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch4_step_mv"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch4_delay_ms"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch4_ilim_ma"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch4_osr"/>
+
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch4_area_cm2"/>
+                        <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch4_polarity_box" SelectedIndex="0"/>
+                        <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch4_hold_box" SelectedIndex="0"/>
+
+                    </Grid>
+
+                </StackPanel>
+            </ScrollViewer>
+
+        </Border>
+
+    </Grid>
+</Window>

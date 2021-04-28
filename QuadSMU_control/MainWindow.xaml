@@ -40,7 +40,7 @@
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="J-V scan">
-                    <Fluent:Button  Header="Change scan parameters" Margin="0,-15,0,0"/>
+                    <Fluent:Button  Header="Change scan parameters" Margin="0,-15,0,0" Click="stability_params_button" />
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="Stability parameters">
