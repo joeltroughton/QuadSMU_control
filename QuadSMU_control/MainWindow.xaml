@@ -59,7 +59,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Interval (mins)" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
-                        <Fluent:TextBox Grid.Row="0" Grid.Column="1" x:Name="stability_interval_mins" Width="50" Text="0"/>
+                        <Fluent:TextBox Grid.Row="0" x:Name="stability_interval_mins" Width="50" Text="0" Grid.ColumnSpan="2" Height="22" Margin="95,0,0,0" VerticalAlignment="Top"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"  Grid.ColumnSpan="2" Text="Save directory" HorizontalAlignment="Left" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
                         <Fluent:TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" x:Name="stability_savedir" BorderThickness="0"  Text="C:\data" HorizontalAlignment="Left" Width="150" Margin="-5,0,0,0"/>
@@ -77,7 +77,19 @@
 
                         <Fluent:Button Grid.Row="0" Click="run_stability_button" Header="Run" FontSize="20" VerticalAlignment="Center" Margin="0,0,0,20"/>
 
-					</Grid>
+                    </Grid>
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox Header="Next measurement" Width="120" HorizontalContentAlignment="Center">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="0" Margin="0,25,0,0" x:Name="stability_countdown_textbox"/>
+
+
+                    </Grid>
                 </Fluent:RibbonGroupBox>
 
             </Fluent:RibbonTabItem>

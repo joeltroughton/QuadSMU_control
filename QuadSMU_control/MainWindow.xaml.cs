@@ -48,6 +48,8 @@ namespace QuadSMU_control
 
         bool measurement_in_progress;
 
+        double stability_timer;
+
         DispatcherTimer stabilityTimer = new DispatcherTimer();
 
         public class iv_curve
@@ -267,10 +269,9 @@ namespace QuadSMU_control
             scan1.calc_voc();
             scan1.calc_jsc();
             scan1.calc_fill_factor();
-            //scan1.calc_pce(double.Parse(irradience.Text));
             scan1.calc_pce(d_irradience);
 
-            //updateDatagrid(scan1);
+            updateDatagrid(scan1);
 
             Debug.Print("VOC: {0}, JSC: {1}, FF: {2}, PCE: {3}", scan1.voc, scan1.jsc, scan1.fill_factor, scan1.pce);
 
@@ -513,9 +514,16 @@ namespace QuadSMU_control
         private void run_stability_button(object sender, RoutedEventArgs e)
         {
             // Start timer
-            stabilityTimer.Interval = TimeSpan.FromSeconds(5);
+
+            stability_timer = double.Parse(stability_interval_mins.Text) * 60;
+            String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_timer).ToString("HH:mm:ss"));
+            stability_countdown_textbox.Text = next_measurement;
+
+
+            stabilityTimer.Interval = TimeSpan.FromSeconds(stability_timer);
             stabilityTimer.Tick += stability_timer_Tick;
             stabilityTimer.Start();
+
         }
 
 
@@ -569,6 +577,10 @@ namespace QuadSMU_control
 
             renderTimer.Stop();
             stabilityTimer.Start();
+
+            String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_timer).ToString("HH:mm:ss"));
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { stability_countdown_textbox.Text = next_measurement; });
+
         }
 
 
