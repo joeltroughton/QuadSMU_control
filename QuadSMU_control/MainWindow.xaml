@@ -33,10 +33,10 @@
             <Fluent:RibbonTabItem Header="Stability">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
-                    <Fluent:CheckBox  Header="Ch 1"/>
-                    <Fluent:CheckBox  Header="Ch 2"/>
-                    <Fluent:CheckBox  Header="Ch 3"/>
-                    <Fluent:CheckBox  Header="Ch 4"/>
+                    <Fluent:CheckBox  Header="Ch 1" x:Name="smu_ch_1_box" />
+                    <Fluent:CheckBox  Header="Ch 2" x:Name="smu_ch_2_box"/>
+                    <Fluent:CheckBox  Header="Ch 3" x:Name="smu_ch_3_box"/>
+                    <Fluent:CheckBox  Header="Ch 4" x:Name="smu_ch_4_box"/>
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="J-V scan">

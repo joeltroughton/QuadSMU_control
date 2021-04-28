@@ -230,26 +230,22 @@ namespace QuadSMU_control
         {
             iv_curve scan1 = new iv_curve();
 
-            switch (smu_channel_box.Text)
-            {
-                case "Channel 1":
-                    scan1.smu_channel = 1;
-                    break;
-                case "Channel 2":
-                    scan1.smu_channel = 2;
-                    break;
-                case "Channel 3":
-                    scan1.smu_channel = 3;
-                    break;
-                case "Channel 4":
-                    scan1.smu_channel = 4;
-                    break;
-            }
+            scan1.smu_channel = smu_channel;
 
-            scan1.start_v = double.Parse(start_voltage.Text);
-            scan1.end_v = double.Parse(end_voltage.Text);
-            scan1.v_step_size = int.Parse(step_size_mv.Text);
-            scan1.device_name = cell_name.Text;
+            //scan1.start_v = double.Parse(start_voltage.Text);
+            //scan1.end_v = double.Parse(end_voltage.Text);
+            //scan1.v_step_size = int.Parse(step_size_mv.Text);
+            //scan1.device_name = cell_name.Text;
+
+            double d_irradience = 0;
+
+            // Can't access UI thread elements (textboxes with scan params) from a different thread. Dispatcher
+            // must grab data for us.
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.start_v = double.Parse(start_voltage.Text); });
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.end_v = double.Parse(end_voltage.Text); });
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.v_step_size = int.Parse(step_size_mv.Text); });
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.device_name = cell_name.Text; });
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { d_irradience = double.Parse(irradience.Text); });
 
             temp_voltage_list.Clear();
             temp_current_list.Clear();
@@ -271,10 +267,10 @@ namespace QuadSMU_control
             scan1.calc_voc();
             scan1.calc_jsc();
             scan1.calc_fill_factor();
-            scan1.calc_pce(double.Parse(irradience.Text));
+            //scan1.calc_pce(double.Parse(irradience.Text));
+            scan1.calc_pce(d_irradience);
 
-
-            updateDatagrid(scan1);
+            //updateDatagrid(scan1);
 
             Debug.Print("VOC: {0}, JSC: {1}, FF: {2}, PCE: {3}", scan1.voc, scan1.jsc, scan1.fill_factor, scan1.pce);
 
@@ -285,7 +281,7 @@ namespace QuadSMU_control
                 Debug.Print("{0} \t {1} \t {2} \t {3} \t {4}", name.device_name, name.voc, name.jsc, name.fill_factor, name.pce);
             }
 
-            renderTimer.Stop();
+            //renderTimer.Stop();
 
             if (immediate_export == true)
             {
@@ -517,31 +513,65 @@ namespace QuadSMU_control
         private void run_stability_button(object sender, RoutedEventArgs e)
         {
             // Start timer
-            stabilityTimer.Interval = TimeSpan.FromSeconds(1);
+            stabilityTimer.Interval = TimeSpan.FromSeconds(5);
             stabilityTimer.Tick += stability_timer_Tick;
             stabilityTimer.Start();
+        }
+
+
+        void stability_timer_Tick(object sender, EventArgs e)
+        {
+            run_scheduled_measurements();
 
         }
 
-        async void stability_timer_Tick(object sender, EventArgs e)
+        private async void run_scheduled_measurements()
         {
+            bool ch1_enabled = (bool)smu_ch_1_box.IsChecked;
+            bool ch2_enabled = (bool)smu_ch_2_box.IsChecked;
+            bool ch3_enabled = (bool)smu_ch_3_box.IsChecked;
+            bool ch4_enabled = (bool)smu_ch_4_box.IsChecked;
+
             stabilityTimer.Stop();
             renderTimer.Start();
 
+            if (ch1_enabled)
+            {
+                iv_curve ch1_curve = await call_measurement(1, false).ConfigureAwait(false);
+                set_hold_voltage(1, ch1_curve);
+                add_stability_to_csv("", ch1_curve);
+                export_jv_csv("", ch1_curve);
+            }
 
-            Debug.Print("Calling CH1 sweep");
-            iv_curve ch1_curve = await call_measurement(1, false).ConfigureAwait(false);
-            Debug.Print("CH1 sweep completed");
+            if (ch2_enabled)
+            {
+                iv_curve ch2_curve = await call_measurement(1, false).ConfigureAwait(false);
+                set_hold_voltage(2, ch2_curve);
+                add_stability_to_csv("", ch2_curve);
+                export_jv_csv("", ch2_curve);
+            }
 
+            if (ch3_enabled)
+            {
+                iv_curve ch3_curve = await call_measurement(3, false).ConfigureAwait(false);
+                set_hold_voltage(3, ch3_curve);
+                add_stability_to_csv("", ch3_curve);
+                export_jv_csv("", ch3_curve);
+            }
 
-            //iv_curve ch1_curve = call_measurement(1, false).Result;
-            //call_measurement(1, false);
+            if (ch4_enabled)
+            {
+                iv_curve ch4_curve = await call_measurement(4, false).ConfigureAwait(false);
+                set_hold_voltage(4, ch4_curve);
+                add_stability_to_csv("", ch4_curve);
+                export_jv_csv("", ch4_curve);
+            }
 
-            Debug.Print("CH1 timestamp: {0}", ch1_curve.end_timestamp);
-
+            renderTimer.Stop();
+            stabilityTimer.Start();
         }
 
-        
+
         void add_stability_to_csv(String filenamedir, iv_curve ivcurve)
         {
             // Find the csvfile at filenamedir and add the PV params from ivcurve
@@ -550,6 +580,11 @@ namespace QuadSMU_control
         void export_jv_csv(String datadir, iv_curve ivcurve)
         {
             // Export the JV curve as a CSV at the datadir location
+        }
+
+        void set_hold_voltage(int smu_channel, iv_curve ivcurve)
+        {
+            // Apply the hold voltage to the SMU channel in question
         }
 
 
