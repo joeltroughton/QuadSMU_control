@@ -48,6 +48,8 @@ namespace QuadSMU_control
 
         bool measurement_in_progress;
 
+        DispatcherTimer stabilityTimer = new DispatcherTimer();
+
         public class iv_curve
         {
             public List<double> voltage = new List<double>();
@@ -447,7 +449,7 @@ namespace QuadSMU_control
             if (!measurement_in_progress)
             {
                 renderTimer.Start();
-                call_measurement(false);
+                call_measurement(1, false);
             }
         }
 
@@ -515,13 +517,41 @@ namespace QuadSMU_control
         private void run_stability_button(object sender, RoutedEventArgs e)
         {
             // Start timer
+            stabilityTimer.Interval = TimeSpan.FromSeconds(1);
+            stabilityTimer.Tick += stability_timer_Tick;
+            stabilityTimer.Start();
+
         }
 
-        void stability_timer_Tick(object sender, EventArgs e)
+        async void stability_timer_Tick(object sender, EventArgs e)
         {
-            // Run scheduled measurement for each channel
-            //iv_curve ch1_curve = call_measurement(1, false);
+            stabilityTimer.Stop();
+            renderTimer.Start();
+
+
+            Debug.Print("Calling CH1 sweep");
+            iv_curve ch1_curve = await call_measurement(1, false).ConfigureAwait(false);
+            Debug.Print("CH1 sweep completed");
+
+
+            //iv_curve ch1_curve = call_measurement(1, false).Result;
+            //call_measurement(1, false);
+
+            Debug.Print("CH1 timestamp: {0}", ch1_curve.end_timestamp);
+
         }
+
+        
+        void add_stability_to_csv(String filenamedir, iv_curve ivcurve)
+        {
+            // Find the csvfile at filenamedir and add the PV params from ivcurve
+        }
+
+        void export_jv_csv(String datadir, iv_curve ivcurve)
+        {
+            // Export the JV curve as a CSV at the datadir location
+        }
+
 
 
     }
