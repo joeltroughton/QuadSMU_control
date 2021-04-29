@@ -216,6 +216,8 @@ namespace QuadSMU_control
 
         public class stability_sweep_parameters
         {
+            public int params_accessed_count = 0;
+
             public double ch1_start_v;
             public double ch2_start_v;
             public double ch3_start_v;

@@ -93,6 +93,12 @@ namespace QuadSMU_control
             //MainWindow.stability_sweep_parameters stability_params = new MainWindow.stability_sweep_parameters();
             stability_params = incoming_stability_params;
 
+            if (stability_params.params_accessed_count > 0)
+            {
+                // Load parameters into textboxes
+                ch1_start_v.Text = stability_params.ch1_start_v.ToString("00.00");
+            }
+
         }
 
         private void set_all_ch1_button(object sender, RoutedEventArgs e)
@@ -166,6 +172,8 @@ namespace QuadSMU_control
             stability_params.ch2_hold_state = ch2_hold_box.SelectedIndex;
             stability_params.ch3_hold_state = ch3_hold_box.SelectedIndex;
             stability_params.ch4_hold_state = ch4_hold_box.SelectedIndex;
+
+            stability_params.params_accessed_count++;
 
             this.Close();
         }
