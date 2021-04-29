@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:QuadSMU_control"
         mc:Ignorable="d"
         Title="stability_settings" Height="670" Width="300"
-        WindowStyle="None">
+        Closing="stability_sweep_param_window_close">
     <Grid>
         <Border Padding="10" >
             <ScrollViewer>

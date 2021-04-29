@@ -96,7 +96,51 @@ namespace QuadSMU_control
             if (stability_params.params_accessed_count > 0)
             {
                 // Load parameters into textboxes
-                ch1_start_v.Text = stability_params.ch1_start_v.ToString("00.00");
+                ch1_start_v.Text = stability_params.ch1_start_v.ToString("0.00");
+                ch2_start_v.Text = stability_params.ch2_start_v.ToString("0.00");
+                ch3_start_v.Text = stability_params.ch3_start_v.ToString("0.00");
+                ch4_start_v.Text = stability_params.ch4_start_v.ToString("0.00");
+
+                ch1_end_v.Text = stability_params.ch1_end_v.ToString("0.00");
+                ch2_end_v.Text = stability_params.ch2_end_v.ToString("0.00");
+                ch3_end_v.Text = stability_params.ch3_end_v.ToString("0.00");
+                ch4_end_v.Text = stability_params.ch4_end_v.ToString("0.00");
+
+                ch1_step_mv.Text = stability_params.ch1_step_mv.ToString("0");
+                ch2_step_mv.Text = stability_params.ch2_step_mv.ToString("0");
+                ch3_step_mv.Text = stability_params.ch3_step_mv.ToString("0");
+                ch4_step_mv.Text = stability_params.ch4_step_mv.ToString("0");
+
+                ch1_delay_ms.Text = stability_params.ch1_delay_ms.ToString("0");
+                ch2_delay_ms.Text = stability_params.ch2_delay_ms.ToString("0");
+                ch3_delay_ms.Text = stability_params.ch3_delay_ms.ToString("0");
+                ch4_delay_ms.Text = stability_params.ch4_delay_ms.ToString("0");
+
+                ch1_ilim_ma.Text = stability_params.ch1_ilim_ma.ToString("0");
+                ch2_ilim_ma.Text = stability_params.ch2_ilim_ma.ToString("0");
+                ch3_ilim_ma.Text = stability_params.ch3_ilim_ma.ToString("0");
+                ch4_ilim_ma.Text = stability_params.ch4_ilim_ma.ToString("0");
+
+                ch1_osr.Text = stability_params.ch1_osr.ToString("0");
+                ch2_osr.Text = stability_params.ch2_osr.ToString("0");
+                ch3_osr.Text = stability_params.ch3_osr.ToString("0");
+                ch4_osr.Text = stability_params.ch4_osr.ToString("0");
+
+                ch1_area_cm2.Text = stability_params.ch1_area_cm2.ToString("0.0");
+                ch2_area_cm2.Text = stability_params.ch2_area_cm2.ToString("0.0");
+                ch3_area_cm2.Text = stability_params.ch3_area_cm2.ToString("0.0");
+                ch4_area_cm2.Text = stability_params.ch4_area_cm2.ToString("0.0");
+
+                ch1_polarity_box.SelectedIndex = stability_params.ch1_polarity;
+                ch2_polarity_box.SelectedIndex = stability_params.ch2_polarity;
+                ch3_polarity_box.SelectedIndex = stability_params.ch3_polarity;
+                ch4_polarity_box.SelectedIndex = stability_params.ch4_polarity;
+
+                ch1_hold_box.SelectedIndex = stability_params.ch1_hold_state;
+                ch2_hold_box.SelectedIndex = stability_params.ch2_hold_state;
+                ch3_hold_box.SelectedIndex = stability_params.ch3_hold_state;
+                ch4_hold_box.SelectedIndex = stability_params.ch4_hold_state;
+
             }
 
         }
@@ -126,8 +170,17 @@ namespace QuadSMU_control
 
         private void save_settings_button(object sender, RoutedEventArgs e)
         {
-            //stability_sweep_parameters stability_params = new stability_sweep_parameters();
+            return_settings();
+            this.Close();
+        }
 
+        private void stability_sweep_param_window_close(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            return_settings();
+        }
+
+        private void return_settings()
+        {
             stability_params.ch1_start_v = double.Parse(ch1_start_v.Text);
             stability_params.ch2_start_v = double.Parse(ch2_start_v.Text);
             stability_params.ch3_start_v = double.Parse(ch3_start_v.Text);
@@ -143,20 +196,20 @@ namespace QuadSMU_control
             stability_params.ch3_step_mv = double.Parse(ch3_step_mv.Text);
             stability_params.ch4_step_mv = double.Parse(ch4_step_mv.Text);
 
-            stability_params.ch1_delay_ms = double.Parse(ch1_delay_ms.Text);
-            stability_params.ch2_delay_ms = double.Parse(ch2_delay_ms.Text);
-            stability_params.ch3_delay_ms = double.Parse(ch3_delay_ms.Text);
-            stability_params.ch4_delay_ms = double.Parse(ch4_delay_ms.Text);
+            stability_params.ch1_delay_ms = int.Parse(ch1_delay_ms.Text);
+            stability_params.ch2_delay_ms = int.Parse(ch2_delay_ms.Text);
+            stability_params.ch3_delay_ms = int.Parse(ch3_delay_ms.Text);
+            stability_params.ch4_delay_ms = int.Parse(ch4_delay_ms.Text);
 
-            stability_params.ch1_ilim_ma = double.Parse(ch1_ilim_ma.Text);
-            stability_params.ch2_ilim_ma = double.Parse(ch2_ilim_ma.Text);
-            stability_params.ch3_ilim_ma = double.Parse(ch3_ilim_ma.Text);
-            stability_params.ch4_ilim_ma = double.Parse(ch4_ilim_ma.Text);
+            stability_params.ch1_ilim_ma = int.Parse(ch1_ilim_ma.Text);
+            stability_params.ch2_ilim_ma = int.Parse(ch2_ilim_ma.Text);
+            stability_params.ch3_ilim_ma = int.Parse(ch3_ilim_ma.Text);
+            stability_params.ch4_ilim_ma = int.Parse(ch4_ilim_ma.Text);
 
-            stability_params.ch1_osr = double.Parse(ch1_osr.Text);
-            stability_params.ch2_osr = double.Parse(ch1_osr.Text);
-            stability_params.ch3_osr = double.Parse(ch1_osr.Text);
-            stability_params.ch4_osr = double.Parse(ch1_osr.Text);
+            stability_params.ch1_osr = int.Parse(ch1_osr.Text);
+            stability_params.ch2_osr = int.Parse(ch1_osr.Text);
+            stability_params.ch3_osr = int.Parse(ch1_osr.Text);
+            stability_params.ch4_osr = int.Parse(ch1_osr.Text);
 
             stability_params.ch1_area_cm2 = double.Parse(ch1_area_cm2.Text);
             stability_params.ch2_area_cm2 = double.Parse(ch2_area_cm2.Text);
@@ -174,8 +227,6 @@ namespace QuadSMU_control
             stability_params.ch4_hold_state = ch4_hold_box.SelectedIndex;
 
             stability_params.params_accessed_count++;
-
-            this.Close();
         }
     }
 }

@@ -131,16 +131,19 @@
 
                         <TextBlock Grid.Row="0" Grid.Column="2" Text="Delay (ms)" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
                         <TextBlock Grid.Row="1" Grid.Column="2" Text="OSR" Margin="5,0,0,0" ToolTip="The number of oversamples measured for each point"/>
-                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Device ID" Margin="5,0,0,0" ToolTip="The number of oversamples measured for each point"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="I limit" Margin="5,0,0,0" ToolTip="The current limit in mA"/>
                         <Fluent:TextBox Grid.Row="0" Grid.Column="3" x:Name="delay_time_ms" Width="50" Text="0"/>
                         <Fluent:TextBox Grid.Row="1" Grid.Column="3" x:Name="osr" Width="50" Text="5"/>
+                        <Fluent:TextBox Grid.Row="2" Grid.Column="3" x:Name="i_limit" Width="50" Text="5"/>
 
                         <TextBlock Grid.Row="0" Grid.Column="4" Text="Irradiance (suns)" Margin="5,0,0,0" Width="150"  ToolTip="The time between each measurement point"/>
                         <TextBlock Grid.Row="1" Grid.Column="4" Text="Active area (cm²)" Margin="5,0,0,0" Width="150" ToolTip="The number of oversamples measured for each point"/>
+                        <TextBlock Grid.Row="2" Grid.Column="4" Text="Cell ID" Margin="5,0,0,0" Width="150" ToolTip="The number of oversamples measured for each point"/>
+
                         <Fluent:TextBox Grid.Row="0" Grid.Column="5" x:Name="irradience" Width="50" Text="1.00"/>
                         <Fluent:TextBox Grid.Row="1" Grid.Column="5" x:Name="active_area_textbox" Width="50" Text="1.0"/>
 
-                        <Fluent:TextBox Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="4" x:Name="cell_name" Text="test_01"/>
+                        <Fluent:TextBox Grid.Row="2" Grid.Column="5" x:Name="cell_name" Margin="-60,0,0,0" Text="test_01"/>
 
                     </Grid>
                 </Fluent:RibbonGroupBox>

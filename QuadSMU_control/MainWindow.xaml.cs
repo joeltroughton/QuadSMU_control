@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO.Ports;
+using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Channels;
@@ -71,8 +72,10 @@ namespace QuadSMU_control
             public double pce;
 
             public int smu_channel;
+            public int osr;
+            public int hold_state; // 0 = VOC, 1 = JSC, 2 = MPP
             public int step_delay; // Milliseconds
-            public int v_step_size; // Millivolts
+            public double v_step_size; // Millivolts
             public bool polarity;
             public bool sweep_direction;
             public double active_area;
@@ -233,20 +236,20 @@ namespace QuadSMU_control
             public double ch3_step_mv;
             public double ch4_step_mv;
 
-            public double ch1_delay_ms;
-            public double ch2_delay_ms;
-            public double ch3_delay_ms;
-            public double ch4_delay_ms;
+            public int ch1_delay_ms;
+            public int ch2_delay_ms;
+            public int ch3_delay_ms;
+            public int ch4_delay_ms;
 
-            public double ch1_ilim_ma;
-            public double ch2_ilim_ma;
-            public double ch3_ilim_ma;
-            public double ch4_ilim_ma;
+            public int ch1_ilim_ma;
+            public int ch2_ilim_ma;
+            public int ch3_ilim_ma;
+            public int ch4_ilim_ma;
 
-            public double ch1_osr;
-            public double ch2_osr;
-            public double ch3_osr;
-            public double ch4_osr;
+            public int ch1_osr;
+            public int ch2_osr;
+            public int ch3_osr;
+            public int ch4_osr;
 
             public double ch1_area_cm2;
             public double ch2_area_cm2;
@@ -284,54 +287,34 @@ namespace QuadSMU_control
 
         }
 
-        private async Task<iv_curve> call_measurement(int smu_channel, bool immediate_export)
+        private async Task<iv_curve> call_measurement(iv_curve jv_scan)
         {
             iv_curve scan1 = new iv_curve();
-
-            scan1.smu_channel = smu_channel;
-
-            //scan1.start_v = double.Parse(start_voltage.Text);
-            //scan1.end_v = double.Parse(end_voltage.Text);
-            //scan1.v_step_size = int.Parse(step_size_mv.Text);
-            //scan1.device_name = cell_name.Text;
-
-            double d_irradience = 0;
-
-            // Can't access UI thread elements (textboxes with scan params) from a different thread. Dispatcher
-            // must grab data for us.
-            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.start_v = double.Parse(start_voltage.Text); });
-            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.end_v = double.Parse(end_voltage.Text); });
-            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.v_step_size = int.Parse(step_size_mv.Text); });
-            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { scan1.device_name = cell_name.Text; });
-            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { d_irradience = double.Parse(irradience.Text); });
 
             temp_voltage_list.Clear();
             temp_current_list.Clear();
 
-            await Task.Run(() => send_levels(scan1));
+            await Task.Run(() => send_levels(jv_scan));
 
-            Debug.Print("JV curve levels sent");
-
-
-            scan1.voltage = temp_voltage_list.ToList();
-            scan1.current = temp_current_list.ToList();
+            jv_scan.voltage = temp_voltage_list.ToList();
+            jv_scan.current = temp_current_list.ToList();
 
             // Calculate cell power
-            for (int i = 0; i < scan1.voltage.Count(); i++)
+            for (int i = 0; i < jv_scan.voltage.Count(); i++)
             {
-                scan1.power.Add(scan1.voltage[i] * scan1.current[i]);
+                jv_scan.power.Add(jv_scan.voltage[i] * jv_scan.current[i]);
             }
 
-            scan1.calc_voc();
-            scan1.calc_jsc();
-            scan1.calc_fill_factor();
-            scan1.calc_pce(d_irradience);
+            jv_scan.calc_voc();
+            jv_scan.calc_jsc();
+            jv_scan.calc_fill_factor();
+            jv_scan.calc_pce(jv_scan.irradiance);
 
-            updateDatagrid(scan1);
+            updateDatagrid(jv_scan);
 
-            Debug.Print("VOC: {0}, JSC: {1}, FF: {2}, PCE: {3}", scan1.voc, scan1.jsc, scan1.fill_factor, scan1.pce);
+            Debug.Print("VOC: {0}, JSC: {1}, FF: {2}, PCE: {3}", jv_scan.voc, jv_scan.jsc, jv_scan.fill_factor, jv_scan.pce);
 
-            measurements_list.Add(scan1);
+            measurements_list.Add(jv_scan);
 
             foreach (iv_curve name in measurements_list)
             {
@@ -340,13 +323,9 @@ namespace QuadSMU_control
 
             //renderTimer.Stop();
 
-            if (immediate_export == true)
-            {
-                // Save JV curve
-                Debug.Print("Data exported");
-            }
+            jv_export(jv_scan);
 
-            return scan1;
+            return jv_scan;
         }
 
         private void connect_serial_port(String com_port)
@@ -417,7 +396,7 @@ namespace QuadSMU_control
             measurement_in_progress = true;
 
             int step_delay_millis = new_curve.step_delay;
-            int v_step_size = new_curve.v_step_size;
+            double v_step_size = new_curve.v_step_size;
             double start_v = new_curve.start_v;
             double end_v = new_curve.end_v;
 
@@ -504,7 +483,37 @@ namespace QuadSMU_control
             if (!measurement_in_progress)
             {
                 renderTimer.Start();
-                call_measurement(1, false);
+                int smu_channel = smu_channel_box.SelectedIndex + 1;
+                double start_v = double.Parse(start_voltage.Text);
+                double end_v = double.Parse(end_voltage.Text);
+                int step_size = int.Parse(step_size_mv.Text);
+                double i_limit_ma = double.Parse(i_limit.Text);
+                int delay_time = int.Parse(delay_time_ms.Text);
+                double dirradience = double.Parse(irradience.Text);
+                string device_name = cell_name.Text;
+                int iosr = int.Parse(osr.Text);
+                double active_area = double.Parse(active_area_textbox.Text);
+                int polarity = 0;
+                int hold_state = 0;
+
+
+                iv_curve single_jv = new iv_curve();
+
+                single_jv = generate_measurement_profile(device_name,
+                    smu_channel,
+                    start_v,
+                    end_v,
+                   step_size,
+                   delay_time,
+                   i_limit_ma,
+                   iosr,
+                   active_area,
+                   polarity,
+                   hold_state
+                );
+
+
+                call_measurement(single_jv);
             }
         }
 
@@ -601,37 +610,37 @@ namespace QuadSMU_control
             stabilityTimer.Stop();
             renderTimer.Start();
 
-            if (ch1_enabled)
-            {
-                iv_curve ch1_curve = await call_measurement(1, false).ConfigureAwait(false);
-                set_hold_voltage(1, ch1_curve);
-                add_stability_to_csv("", ch1_curve);
-                export_jv_csv("", ch1_curve);
-            }
+            //if (ch1_enabled)
+            //{
+            //    iv_curve ch1_curve = await call_measurement(1, false).ConfigureAwait(false);
+            //    set_hold_voltage(1, ch1_curve);
+            //    add_stability_to_csv("", ch1_curve);
+            //    export_jv_csv("", ch1_curve);
+            //}
 
-            if (ch2_enabled)
-            {
-                iv_curve ch2_curve = await call_measurement(1, false).ConfigureAwait(false);
-                set_hold_voltage(2, ch2_curve);
-                add_stability_to_csv("", ch2_curve);
-                export_jv_csv("", ch2_curve);
-            }
+            //if (ch2_enabled)
+            //{
+            //    iv_curve ch2_curve = await call_measurement(1, false).ConfigureAwait(false);
+            //    set_hold_voltage(2, ch2_curve);
+            //    add_stability_to_csv("", ch2_curve);
+            //    export_jv_csv("", ch2_curve);
+            //}
 
-            if (ch3_enabled)
-            {
-                iv_curve ch3_curve = await call_measurement(3, false).ConfigureAwait(false);
-                set_hold_voltage(3, ch3_curve);
-                add_stability_to_csv("", ch3_curve);
-                export_jv_csv("", ch3_curve);
-            }
+            //if (ch3_enabled)
+            //{
+            //    iv_curve ch3_curve = await call_measurement(3, false).ConfigureAwait(false);
+            //    set_hold_voltage(3, ch3_curve);
+            //    add_stability_to_csv("", ch3_curve);
+            //    export_jv_csv("", ch3_curve);
+            //}
 
-            if (ch4_enabled)
-            {
-                iv_curve ch4_curve = await call_measurement(4, false).ConfigureAwait(false);
-                set_hold_voltage(4, ch4_curve);
-                add_stability_to_csv("", ch4_curve);
-                export_jv_csv("", ch4_curve);
-            }
+            //if (ch4_enabled)
+            //{
+            //    iv_curve ch4_curve = await call_measurement(4, false).ConfigureAwait(false);
+            //    set_hold_voltage(4, ch4_curve);
+            //    add_stability_to_csv("", ch4_curve);
+            //    export_jv_csv("", ch4_curve);
+            //}
 
             renderTimer.Stop();
             stabilityTimer.Start();
@@ -662,11 +671,62 @@ namespace QuadSMU_control
             stability_settings stability_param_dialog = new stability_settings(stability_sweep_params);
 
             stability_param_dialog.Show();
-            
+
         }
 
         public void collect_params()
         {
+        }
+
+
+        public iv_curve generate_measurement_profile(
+            string device_name,
+            int smu_channel,
+            double start_v,
+            double end_v,
+            double step_mv,
+            int delay_ms,
+            double ilim_ma,
+            int osr,
+            double active_area,
+            int polarity,
+            int hold_state
+            )
+        {
+            iv_curve iv_profile = new iv_curve();
+
+            iv_profile.device_name = device_name;
+            iv_profile.smu_channel = smu_channel;
+            iv_profile.start_v = start_v;
+            iv_profile.end_v = end_v;
+            iv_profile.v_step_size = step_mv;
+            iv_profile.step_delay = delay_ms;
+            iv_profile.i_limit = ilim_ma;
+            iv_profile.osr = osr;
+            iv_profile.active_area = active_area;
+            iv_profile.polarity = Convert.ToBoolean(polarity);
+
+            return iv_profile;
+        }
+
+        private void jv_export(iv_curve sweep)
+        {
+            var csv = new StringBuilder();
+
+            double[] voltage_array = sweep.voltage.ToArray();
+            double[] current_array = sweep.current.ToArray();
+
+            for (int i = 0; i < voltage_array.Length; i++)
+            {
+                var voltage = voltage_array[i].ToString();
+                var current = current_array[i].ToString();
+                var newLine = string.Format("{0},{1}", voltage, current);
+                csv.AppendLine(newLine);
+            }
+
+            File.WriteAllText("C:/data/output.csv", csv.ToString());
+
+
         }
     }
 
