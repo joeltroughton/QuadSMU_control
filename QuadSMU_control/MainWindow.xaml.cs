@@ -50,6 +50,8 @@ namespace QuadSMU_control
 
         double stability_timer;
 
+        stability_sweep_parameters stability_sweep_params = new stability_sweep_parameters();
+
         DispatcherTimer stabilityTimer = new DispatcherTimer();
 
         public class iv_curve
@@ -209,6 +211,58 @@ namespace QuadSMU_control
             public double jsc { get; set; }
             public double ff { get; set; }
             public double pce { get; set; }
+
+        }
+
+        public class stability_sweep_parameters
+        {
+            public double ch1_start_v;
+            public double ch2_start_v;
+            public double ch3_start_v;
+            public double ch4_start_v;
+
+            public double ch1_end_v;
+            public double ch2_end_v;
+            public double ch3_end_v;
+            public double ch4_end_v;
+
+            public double ch1_step_mv;
+            public double ch2_step_mv;
+            public double ch3_step_mv;
+            public double ch4_step_mv;
+
+            public double ch1_delay_ms;
+            public double ch2_delay_ms;
+            public double ch3_delay_ms;
+            public double ch4_delay_ms;
+
+            public double ch1_ilim_ma;
+            public double ch2_ilim_ma;
+            public double ch3_ilim_ma;
+            public double ch4_ilim_ma;
+
+            public double ch1_osr;
+            public double ch2_osr;
+            public double ch3_osr;
+            public double ch4_osr;
+
+            public double ch1_area_cm2;
+            public double ch2_area_cm2;
+            public double ch3_area_cm2;
+            public double ch4_area_cm2;
+
+            public int ch1_polarity;
+            public int ch2_polarity;
+            public int ch3_polarity;
+            public int ch4_polarity;
+
+            public int ch1_hold_state;
+            public int ch2_hold_state;
+            public int ch3_hold_state;
+            public int ch4_hold_state;
+
+
+
 
         }
 
@@ -438,8 +492,8 @@ namespace QuadSMU_control
             //PlotAll();
             //PrintChecked();
             //sp.Close();
+            Debug.Print("from params box: {0}", stability_sweep_params.ch1_end_v);
 
-            Debug.Print("From settings window: {0}", stability_settings.ch1_start_v.Text);
 
         }
 
@@ -603,8 +657,14 @@ namespace QuadSMU_control
 
         private void stability_params_button(object sender, RoutedEventArgs e)
         {
-            stability_settings p = new stability_settings();
-            p.Show();
+            stability_settings stability_param_dialog = new stability_settings(stability_sweep_params);
+
+            stability_param_dialog.Show();
+            
+        }
+
+        public void collect_params()
+        {
         }
     }
 

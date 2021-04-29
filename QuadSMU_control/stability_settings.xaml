@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QuadSMU_control"
         mc:Ignorable="d"
-        Title="stability_settings" Height="670" Width="300">
+        Title="stability_settings" Height="670" Width="300"
+        WindowStyle="None">
     <Grid>
         <Border Padding="10" >
             <ScrollViewer>
@@ -23,7 +24,7 @@
                     </Grid>
 
                     <Button Content="Set all SMU channels to CH1 parameters" Margin="0,10,0,0" Click="set_all_ch1_button"/>
-                    <Button Content="Save settings &amp; exit" Margin="0,10,0,0"/>
+                    <Button Content="Save settings &amp; exit" Margin="0,10,0,0" Click="save_settings_button"/>
 
 
 
