@@ -10,6 +10,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Diagnostics;
+using System.IO;
+using Microsoft.Win32;
 
 namespace QuadSMU_control
 {
@@ -160,7 +162,44 @@ namespace QuadSMU_control
 
         private void export_parameters_button(object sender, RoutedEventArgs e)
         {
+            var settings_csv = new StringBuilder();
 
+            var newLine = string.Format("Paramter, Channel 1, Channel 2, Channel 3, Channel 4");
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Start V, {0}, {1}, {2}, {3}", ch1_start_v.Text, ch2_start_v.Text, ch3_start_v.Text, ch4_start_v.Text);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("End V, {0}, {1}, {2}, {3}", ch1_end_v.Text, ch2_end_v.Text, ch3_end_v.Text, ch4_end_v.Text);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Step size (mV), {0}, {1}, {2}, {3}", ch1_step_mv.Text, ch2_step_mv.Text, ch3_step_mv.Text, ch4_step_mv.Text);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Delay time (ms), {0}, {1}, {2}, {3}", ch1_delay_ms.Text, ch2_delay_ms.Text, ch3_delay_ms.Text, ch4_delay_ms.Text);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Current limit (mA), {0}, {1}, {2}, {3}", ch1_ilim_ma.Text, ch2_ilim_ma.Text, ch3_ilim_ma.Text, ch4_ilim_ma.Text);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Oversample rate, {0}, {1}, {2}, {3}", ch1_osr.Text, ch2_osr.Text, ch3_osr.Text, ch4_osr.Text);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Active area (cm2), {0}, {1}, {2}, {3}", ch1_area_cm2.Text, ch2_area_cm2.Text, ch3_area_cm2.Text, ch4_area_cm2.Text);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Polarity, {0}, {1}, {2}, {3}", ch1_polarity_box.SelectedIndex, ch2_polarity_box.SelectedIndex, ch3_polarity_box.SelectedIndex, ch4_polarity_box.SelectedIndex);
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Hold condition, {0}, {1}, {2}, {3}", ch1_hold_box.SelectedIndex, ch2_hold_box.SelectedIndex, ch3_hold_box.SelectedIndex, ch4_hold_box.SelectedIndex);
+            settings_csv.AppendLine(newLine);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Comma separated value (*.csv)|*.csv";
+
+            if (saveFileDialog.ShowDialog() == true)
+
+                File.WriteAllText(saveFileDialog.FileName, settings_csv.ToString());
         }
 
         private void import_parameters_button(object sender, RoutedEventArgs e)
