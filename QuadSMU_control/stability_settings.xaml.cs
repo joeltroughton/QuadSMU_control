@@ -12,6 +12,8 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
+using CsvHelper;
+using System.Globalization;
 
 namespace QuadSMU_control
 {
@@ -164,7 +166,7 @@ namespace QuadSMU_control
         {
             var settings_csv = new StringBuilder();
 
-            var newLine = string.Format("Paramter, Channel 1, Channel 2, Channel 3, Channel 4");
+            var newLine = string.Format("Parameter, Channel 1, Channel 2, Channel 3, Channel 4");
             settings_csv.AppendLine(newLine);
 
             newLine = string.Format("Start V, {0}, {1}, {2}, {3}", ch1_start_v.Text, ch2_start_v.Text, ch3_start_v.Text, ch4_start_v.Text);
@@ -204,6 +206,91 @@ namespace QuadSMU_control
 
         private void import_parameters_button(object sender, RoutedEventArgs e)
         {
+            // This is so crude.
+            // TODO: Get settings CSV in a format that can be read straight into a class by csvhelper
+
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+            {
+
+            }
+
+
+            var lines = File.ReadLines(openFileDialog.FileName);
+
+            bool first_line = true;
+
+            string[] read_lines;
+            List<string> read_lines_list = new List<string>();
+
+            foreach (string line in lines)
+            {
+                if (first_line)
+                {
+                    first_line = false;
+                }
+                else
+                {
+                    read_lines_list.Add(line);
+                }
+            }
+
+            read_lines = read_lines_list.ToArray();
+
+            string[] start_v = read_lines[0].Split(",");
+            string[] end_v = read_lines[1].Split(",");
+            string[] step_mv = read_lines[2].Split(",");
+            string[] delay_ms = read_lines[3].Split(",");
+            string[] ilim_ma = read_lines[4].Split(",");
+            string[] osr = read_lines[5].Split(",");
+            string[] active_area = read_lines[6].Split(",");
+            string[] polarity = read_lines[7].Split(",");
+            string[] hold = read_lines[8].Split(",");
+
+            ch1_start_v.Text = start_v[1];
+            ch2_start_v.Text = start_v[2];
+            ch3_start_v.Text = start_v[3];
+            ch4_start_v.Text = start_v[4];
+
+            ch1_end_v.Text = end_v[1];
+            ch2_end_v.Text = end_v[2];
+            ch3_end_v.Text = end_v[3];
+            ch4_end_v.Text = end_v[4];
+
+            ch1_step_mv.Text = step_mv[1];
+            ch2_step_mv.Text = step_mv[2];
+            ch3_step_mv.Text = step_mv[3];
+            ch4_step_mv.Text = step_mv[4];
+
+            ch1_delay_ms.Text = delay_ms[1];
+            ch2_delay_ms.Text = delay_ms[2];
+            ch3_delay_ms.Text = delay_ms[3];
+            ch4_delay_ms.Text = delay_ms[4];
+
+            ch1_ilim_ma.Text = ilim_ma[1];
+            ch2_ilim_ma.Text = ilim_ma[2];
+            ch3_ilim_ma.Text = ilim_ma[3];
+            ch4_ilim_ma.Text = ilim_ma[4];
+
+            ch1_osr.Text = osr[1];
+            ch2_osr.Text = osr[2];
+            ch3_osr.Text = osr[3];
+            ch4_osr.Text = osr[4];
+
+            ch1_area_cm2.Text = active_area[1];
+            ch2_area_cm2.Text = active_area[2];
+            ch3_area_cm2.Text = active_area[3];
+            ch4_area_cm2.Text = active_area[4];
+
+            ch1_polarity_box.SelectedIndex = int.Parse(polarity[1]);
+            ch2_polarity_box.SelectedIndex = int.Parse(polarity[2]);
+            ch3_polarity_box.SelectedIndex = int.Parse(polarity[3]);
+            ch4_polarity_box.SelectedIndex = int.Parse(polarity[4]);
+
+            ch1_hold_box.SelectedIndex = int.Parse(hold[1]);
+            ch2_hold_box.SelectedIndex = int.Parse(hold[2]);
+            ch3_hold_box.SelectedIndex = int.Parse(hold[3]);
+            ch4_hold_box.SelectedIndex = int.Parse(hold[4]);
 
         }
 
