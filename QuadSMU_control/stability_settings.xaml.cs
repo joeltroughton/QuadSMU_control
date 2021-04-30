@@ -12,7 +12,6 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
-using CsvHelper;
 using System.Globalization;
 
 namespace QuadSMU_control
