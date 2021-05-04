@@ -58,15 +58,15 @@
                         <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
                         <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch1_start_v"/>
-                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch1_end_v"/>
-                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch1_step_mv"/>
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch1_start_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch1_end_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch1_step_mv" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch1_delay_ms"/>
-                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch1_ilim_ma"/>
-                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch1_osr"/>
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch1_delay_ms" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch1_ilim_ma" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch1_osr" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch1_area_cm2"/>
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch1_area_cm2" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
                         <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch1_polarity_box" SelectedIndex="0"/>
                         <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch1_hold_box" SelectedIndex="0"/>
 
@@ -102,15 +102,15 @@
                         <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
                         <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch2_start_v"/>
-                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch2_end_v"/>
-                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch2_step_mv"/>
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch2_start_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch2_end_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch2_step_mv" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch2_delay_ms"/>
-                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch2_ilim_ma"/>
-                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch2_osr"/>
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch2_delay_ms" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch2_ilim_ma" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch2_osr" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch2_area_cm2"/>
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch2_area_cm2" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
                         <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch2_polarity_box" SelectedIndex="0"/>
                         <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch2_hold_box" SelectedIndex="0"/>
 
@@ -146,15 +146,15 @@
                         <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
                         <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch3_start_v"/>
-                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch3_end_v"/>
-                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch3_step_mv"/>
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch3_start_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch3_end_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch3_step_mv" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch3_delay_ms"/>
-                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch3_ilim_ma"/>
-                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch3_osr"/>
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch3_delay_ms" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch3_ilim_ma" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch3_osr" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch3_area_cm2"/>
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch3_area_cm2" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
                         <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch3_polarity_box" SelectedIndex="0"/>
                         <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch3_hold_box" SelectedIndex="0"/>
 
@@ -190,15 +190,15 @@
                         <TextBlock Grid.Column="1" Grid.Row="4" Text="Centre polarity"/>
                         <TextBlock Grid.Column="2" Grid.Row="4" Text="Hold condition"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch4_start_v"/>
-                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch4_end_v"/>
-                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch4_step_mv"/>
+                        <TextBox Grid.Column="0" Grid.Row="1" Text="1.2" x:Name="ch4_start_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="-0.2" x:Name="ch4_end_v" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="1" Text="20" x:Name="ch4_step_mv" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch4_delay_ms"/>
-                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch4_ilim_ma"/>
-                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch4_osr"/>
+                        <TextBox Grid.Column="0" Grid.Row="3" Text="50" x:Name="ch4_delay_ms" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="10" x:Name="ch4_ilim_ma" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
+                        <TextBox Grid.Column="2" Grid.Row="3" Text="10" x:Name="ch4_osr" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
 
-                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch4_area_cm2"/>
+                        <TextBox Grid.Column="0" Grid.Row="5" Text="0.1" x:Name="ch4_area_cm2" GotFocus="TextBox_GotFocus" PreviewTextInput="TextBox_PreviewTextInput"/>
                         <ComboBox Grid.Column="1" Grid.Row="5" x:Name="ch4_polarity_box" SelectedIndex="0"/>
                         <ComboBox Grid.Column="2" Grid.Row="5" x:Name="ch4_hold_box" SelectedIndex="0"/>
 

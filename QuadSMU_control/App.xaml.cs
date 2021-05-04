@@ -14,4 +14,5 @@ namespace QuadSMU_control
     public partial class App : Application
     {
     }
+
 }

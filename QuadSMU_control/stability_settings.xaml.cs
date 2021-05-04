@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace QuadSMU_control
 {
@@ -353,5 +354,20 @@ namespace QuadSMU_control
 
             stability_params.params_accessed_count++;
         }
+
+        /// <summary>Highlights textbox content when focussed upon</summary>
+        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+            textBox.Dispatcher.BeginInvoke(new Action(() => textBox.SelectAll()));
+        }
+
+        /// <summary>Checks textbox input for forbidden characters (letters & symbol)</summary>
+        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            e.Handled = Regex.IsMatch(e.Text, "[^0-9.-]+");
+        }
+
     }
 }
