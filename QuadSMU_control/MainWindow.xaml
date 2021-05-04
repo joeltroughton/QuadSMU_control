@@ -134,7 +134,7 @@
                         <TextBlock Grid.Row="2" Grid.Column="2" Text="I limit" Margin="5,0,0,0" ToolTip="The current limit in mA"/>
                         <Fluent:TextBox Grid.Row="0" Grid.Column="3" x:Name="delay_time_ms" Width="50" Text="0"/>
                         <Fluent:TextBox Grid.Row="1" Grid.Column="3" x:Name="osr" Width="50" Text="5"/>
-                        <Fluent:TextBox Grid.Row="2" Grid.Column="3" x:Name="i_limit" Width="50" Text="5"/>
+                        <Fluent:TextBox Grid.Row="2" Grid.Column="3" x:Name="i_limit" Width="50" Text="40"/>
 
                         <TextBlock Grid.Row="0" Grid.Column="4" Text="Irradiance (suns)" Margin="5,0,0,0" Width="150"  ToolTip="The time between each measurement point"/>
                         <TextBlock Grid.Row="1" Grid.Column="4" Text="Active area (cm²)" Margin="5,0,0,0" Width="150" ToolTip="The number of oversamples measured for each point"/>

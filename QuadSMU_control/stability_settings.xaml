@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QuadSMU_control"
         mc:Ignorable="d"
-        Title="stability_settings" Height="670" Width="300"
+        Title="stability_settings" Height="700" Width="300"
         Closing="stability_sweep_param_window_close">
     <Grid>
         <Border Padding="10" >

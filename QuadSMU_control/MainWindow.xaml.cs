@@ -444,11 +444,33 @@ namespace QuadSMU_control
             double start_v = new_curve.start_v;
             double end_v = new_curve.end_v;
 
-            double voltage_sweep_span = Math.Abs(start_v) + Math.Abs(end_v);
+            double voltage_sweep_span = Math.Abs(start_v - end_v);
             double v_step_size_volts = (double)v_step_size / 1000;
             int number_of_steps = (int)(voltage_sweep_span / v_step_size_volts);
 
-            double[] voltage_step_array = new double[number_of_steps + 2]; // 2 extra steps because we want to measure the start and the end voltagess
+            double[] voltage_step_array = new double[number_of_steps + 1]; // 2 extra steps because we want to measure the start and the end voltagess
+
+            if (start_v > end_v)
+            {
+                for (int i = 0; i < number_of_steps + 1; i++)
+                {
+                    voltage_step_array[i] = start_v - (v_step_size_volts * i);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < number_of_steps + 1; i++)
+                {
+                    voltage_step_array[i] = start_v + (v_step_size_volts * i);
+                }
+            }
+
+
+            foreach (double voltage in voltage_step_array)
+            {
+                Debug.Print("{0}", voltage);
+            }
+
 
             //Set current limit & OSR, then set the voltage to the start level and enable the output
             string send = String.Format("CH{0}:CUR {1}", new_curve.smu_channel, new_curve.i_limit);
@@ -469,15 +491,10 @@ namespace QuadSMU_control
 
             new_curve.set_start_timestamp();
 
-            for (int i = 0; i < number_of_steps + 2; i++)
-            {
-                voltage_step_array[i] = start_v - (v_step_size_volts * i);
-            }
 
-
-            foreach (float voltage in voltage_step_array)
+            foreach (double voltage in voltage_step_array)
             {
-                send = String.Format("CH{0}:MEA:VOL {1}", new_curve.smu_channel, voltage);
+                send = String.Format("CH{0}:MEA:VOL {1:0.000}", new_curve.smu_channel, voltage);
                 replyRecieved = false;
                 Debug.Print("Sending: {0}", send);
                 sp.WriteLine(send);
@@ -705,7 +722,7 @@ namespace QuadSMU_control
 
                 await call_measurement(ch1_jv).ConfigureAwait(false);
                 set_hold_voltage(ch1_jv);
-                add_stability_to_csv("C:\\data\\quad\\test.csv", ch1_jv);
+                add_stability_stats_to_csv("C:\\data\\quad\\stats.csv", ch1_jv);
                 jv_export("C:\\data\\quad\\test.csv", ch1_jv);
             }
 
@@ -728,7 +745,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch2_jv);
                 set_hold_voltage(ch2_jv);
-                add_stability_to_csv("", ch2_jv);
+                add_stability_stats_to_csv("", ch2_jv);
                 jv_export("", ch2_jv);
             }
 
@@ -751,7 +768,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch3_jv);
                 set_hold_voltage(ch3_jv);
-                add_stability_to_csv("", ch3_jv);
+                add_stability_stats_to_csv("", ch3_jv);
                 jv_export("", ch3_jv);
             }
 
@@ -774,7 +791,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch4_jv);
                 set_hold_voltage(ch4_jv);
-                add_stability_to_csv("", ch4_jv);
+                add_stability_stats_to_csv("", ch4_jv);
                 jv_export("", ch4_jv);
             }
 
@@ -785,13 +802,6 @@ namespace QuadSMU_control
             System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { stability_countdown_textbox.Text = next_measurement; });
 
         }
-
-
-        void add_stability_to_csv(String filenamedir, iv_curve ivcurve)
-        {
-            // Find the csvfile at filenamedir and add the PV params from ivcurve
-        }
-
 
         void set_hold_voltage(iv_curve ivcurve)
         {
@@ -869,7 +879,29 @@ namespace QuadSMU_control
 
             watch.Stop();
             Debug.Print("jv_export took {0}ms", watch.ElapsedMilliseconds);
+        }
 
+        private void add_stability_stats_to_csv(string datadir, iv_curve ivcurve)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            var csv = new StringBuilder();
+
+            if (!File.Exists(datadir))
+            {
+                String header1 = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), ");
+                csv.AppendLine(header1);
+            }
+
+            String header2 = String.Format("{0}, {1}, {2}, {3}, {4}", ivcurve.start_timestamp, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce);
+
+            csv.AppendLine(header2);
+
+
+            File.AppendAllText(datadir, csv.ToString());
+
+            watch.Stop();
+            Debug.Print("add_stability_stats_to_csv took {0}ms", watch.ElapsedMilliseconds);
         }
     }
 
