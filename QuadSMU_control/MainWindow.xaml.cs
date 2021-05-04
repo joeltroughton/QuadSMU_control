@@ -21,6 +21,8 @@ using System.Threading.Channels;
 using ScottPlot;
 using System.Windows.Forms;
 using System.Data;
+using CsvHelper;
+using System.Globalization;
 
 namespace QuadSMU_control
 {
@@ -630,10 +632,10 @@ namespace QuadSMU_control
                     stability_sweep_params.ch1_polarity,
                     stability_sweep_params.ch1_hold_state);
 
-                call_measurement(ch1_jv);
+                await call_measurement(ch1_jv).ConfigureAwait(false);
                 set_hold_voltage(ch1_jv);
-                add_stability_to_csv("", ch1_jv);
-                export_jv_csv("", ch1_jv);
+                add_stability_to_csv("C:\\data\\quad\\test.csv", ch1_jv);
+                export_jv_csv("C:\\data\\quad\\test.csv", ch1_jv);
             }
 
             if (ch2_enabled)
@@ -718,7 +720,20 @@ namespace QuadSMU_control
 
         void export_jv_csv(String datadir, iv_curve ivcurve)
         {
+            Debug.Print("exporting JV");
             // Export the JV curve as a CSV at the datadir location
+            using (FileStream fs = File.Create(datadir))
+            {
+
+            }
+
+            using (var writer = new StreamWriter(datadir))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteRecords(ivcurve.voltage);
+            }
+
+
         }
 
         void set_hold_voltage(iv_curve ivcurve)
