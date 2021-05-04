@@ -97,13 +97,12 @@ namespace QuadSMU_control
                     Array.Reverse(voltage_array);
                     Array.Reverse(current_array);
                     Array.Reverse(power_array);
-
                 }
 
-                for (int i = 0; i < voltage_array.Count(); i++)
-                {
-                    Debug.Print("{0} \t {1} \t {2}", voltage_array[i], current_array[i], power_array[i]);
-                }
+                //for (int i = 0; i < voltage_array.Count(); i++)
+                //{
+                //    Debug.Print("{0} \t {1} \t {2}", voltage_array[i], current_array[i], power_array[i]);
+                //}
 
                 double lastPositiveJ = 0;
                 double lastPositiveV = 0;
@@ -127,11 +126,19 @@ namespace QuadSMU_control
                     }
                 }
 
-                double vocSlope = (firstNegativeJ - lastPositiveJ) / (firstNegativeV - lastPositiveV);
-                double jIntercept = lastPositiveJ - (vocSlope * lastPositiveV);
-                double voc = (0 - jIntercept) / vocSlope;
+                if (firstNegativeV == 0)
+                {
+                    this.voc = 0;
+                    Debug.Print("Curve never passes through 0A. Don't calculate VOC");
+                }
+                else
+                {
+                    double vocSlope = (firstNegativeJ - lastPositiveJ) / (firstNegativeV - lastPositiveV);
+                    double jIntercept = lastPositiveJ - (vocSlope * lastPositiveV);
+                    double voc = (0 - jIntercept) / vocSlope;
+                    this.voc = Math.Round(Math.Abs(voc), 3);
+                }
 
-                this.voc = Math.Round(Math.Abs(voc), 3);
             }
 
             public void calc_jsc()
@@ -164,23 +171,51 @@ namespace QuadSMU_control
                     }
                 }
 
-                double jscSlope = (firstPositiveV - lastNegativeV) / (firstPositiveJ - lastNegativeJ);
-                double vIntercept = lastNegativeV - (jscSlope * lastNegativeJ);
-                double jsc = (0 - vIntercept) / jscSlope;
+                if (lastNegativeV == 0 || lastNegativeJ == 0 || firstPositiveV == 0 || firstPositiveJ == 0)
+                {
+                    this.jsc = 0;
+                    Debug.Print("Curve never passes through 0V. Don't calculate JSC");
+                }
+                else
+                {
+                    double jscSlope = (firstPositiveV - lastNegativeV) / (firstPositiveJ - lastNegativeJ);
+                    double vIntercept = lastNegativeV - (jscSlope * lastNegativeJ);
+                    double jsc = (0 - vIntercept) / jscSlope;
 
-                this.jsc = Math.Round((Math.Abs(jsc)), 2);
+                    this.jsc = Math.Round((Math.Abs(jsc)), 2);
+                }
+
             }
 
             public void calc_fill_factor()
             {
+                double[] voltage_array = this.voltage.ToArray();
+                double[] current_array = this.current.ToArray();
                 double[] power_array = this.power.ToArray();
+
+                for (int i = 0; i < voltage_array.Count(); i++)
+                {
+                    Debug.Print("{0} \t {1} \t {2}", voltage_array[i], current_array[i], power_array[i]);
+                }
+
+                if (current_array[0] < 0)
+                {
+                    Array.Reverse(voltage_array);
+                    Array.Reverse(current_array);
+                    Array.Reverse(power_array);
+                    Debug.Print("Arrays flipped");
+                }
 
                 try
                 {
-                    double maximum_power_point = power_array.Max();
+                    double maximum_power_point = power_array.Min();
                     int maximum_power_point_index = power_array.ToList().IndexOf(maximum_power_point);
 
                     double fill_factor = Math.Abs(maximum_power_point) / (Math.Abs(this.voc) * Math.Abs(this.jsc));
+
+
+                    Debug.Print("Power array max = {0} at index {1}", maximum_power_point, maximum_power_point_index);
+                    Debug.Print("VOC: {0} \t JSC: {1}", this.voc, this.jsc);
 
                     this.fill_factor = Math.Round(fill_factor, 3);
                 }
@@ -189,9 +224,9 @@ namespace QuadSMU_control
                     Debug.Print("FF incalculable");
                 }
             }
-            public void calc_pce(double irradience)
+            public void calc_pce()
             {
-                this.pce = Math.Round(((this.voc * this.jsc * this.fill_factor) / irradience), 3);
+                this.pce = Math.Round(((this.voc * this.jsc * this.fill_factor) / this.irradiance), 3);
             }
             public void export_file()
             {
@@ -222,6 +257,8 @@ namespace QuadSMU_control
         public class stability_sweep_parameters
         {
             public int params_accessed_count = 0;
+
+            public double stability_irradience;
 
             public double ch1_start_v;
             public double ch2_start_v;
@@ -312,7 +349,7 @@ namespace QuadSMU_control
             jv_scan.calc_voc();
             jv_scan.calc_jsc();
             jv_scan.calc_fill_factor();
-            jv_scan.calc_pce(jv_scan.irradiance);
+            jv_scan.calc_pce();
 
             updateDatagrid(jv_scan);
 
@@ -399,6 +436,9 @@ namespace QuadSMU_control
         {
             measurement_in_progress = true;
 
+            sp.DiscardInBuffer();
+            sp.DiscardOutBuffer();
+
             int step_delay_millis = new_curve.step_delay;
             double v_step_size = new_curve.v_step_size;
             double start_v = new_curve.start_v;
@@ -410,7 +450,7 @@ namespace QuadSMU_control
 
             double[] voltage_step_array = new double[number_of_steps + 2]; // 2 extra steps because we want to measure the start and the end voltagess
 
-            //Set current limit & OSR, then set the voltage to 0 and enable the output
+            //Set current limit & OSR, then set the voltage to the start level and enable the output
             string send = String.Format("CH{0}:CUR {1}", new_curve.smu_channel, new_curve.i_limit);
             sp.WriteLine(send);
             await Task.Delay(5);
@@ -419,7 +459,7 @@ namespace QuadSMU_control
             sp.WriteLine(send);
             await Task.Delay(5);
 
-            send = String.Format("CH{0}:VOL 0", new_curve.smu_channel);
+            send = String.Format("CH{0}:VOL {1}", new_curve.smu_channel, new_curve.start_v);
             sp.WriteLine(send);
             await Task.Delay(10);
 
@@ -539,6 +579,7 @@ namespace QuadSMU_control
                    i_limit_ma,
                    iosr,
                    active_area,
+                   dirradience,
                    polarity,
                    hold_state
                 );
@@ -658,8 +699,9 @@ namespace QuadSMU_control
                     stability_sweep_params.ch1_ilim_ma,
                     stability_sweep_params.ch1_osr,
                     stability_sweep_params.ch1_area_cm2,
+                    stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch1_polarity,
-                    stability_sweep_params.ch1_hold_state);
+                    stability_sweep_params.ch1_hold_state); ;
 
                 await call_measurement(ch1_jv).ConfigureAwait(false);
                 set_hold_voltage(ch1_jv);
@@ -680,6 +722,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch2_ilim_ma,
                     stability_sweep_params.ch2_osr,
                     stability_sweep_params.ch2_area_cm2,
+                    stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch2_polarity,
                     stability_sweep_params.ch2_hold_state);
 
@@ -702,6 +745,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch3_ilim_ma,
                     stability_sweep_params.ch3_osr,
                     stability_sweep_params.ch3_area_cm2,
+                    stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch3_polarity,
                     stability_sweep_params.ch3_hold_state);
 
@@ -724,6 +768,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch4_ilim_ma,
                     stability_sweep_params.ch4_osr,
                     stability_sweep_params.ch4_area_cm2,
+                    stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch4_polarity,
                     stability_sweep_params.ch4_hold_state);
 
@@ -775,6 +820,7 @@ namespace QuadSMU_control
             double ilim_ma,
             int osr,
             double active_area,
+            double dirradience,
             int polarity,
             int hold_state
             )
@@ -790,6 +836,7 @@ namespace QuadSMU_control
             iv_profile.i_limit = ilim_ma;
             iv_profile.osr = osr;
             iv_profile.active_area = active_area;
+            iv_profile.irradiance = dirradience;
             iv_profile.polarity = Convert.ToBoolean(polarity);
 
             return iv_profile;

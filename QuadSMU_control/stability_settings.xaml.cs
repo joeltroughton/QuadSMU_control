@@ -100,6 +100,8 @@ namespace QuadSMU_control
             if (stability_params.params_accessed_count > 0)
             {
                 // Load parameters into textboxes
+                irradience.Text = stability_params.stability_irradience.ToString("0.00");
+
                 ch1_start_v.Text = stability_params.ch1_start_v.ToString("0.00");
                 ch2_start_v.Text = stability_params.ch2_start_v.ToString("0.00");
                 ch3_start_v.Text = stability_params.ch3_start_v.ToString("0.00");
@@ -196,6 +198,12 @@ namespace QuadSMU_control
             newLine = string.Format("Hold condition, {0}, {1}, {2}, {3}", ch1_hold_box.SelectedIndex, ch2_hold_box.SelectedIndex, ch3_hold_box.SelectedIndex, ch4_hold_box.SelectedIndex);
             settings_csv.AppendLine(newLine);
 
+            newLine = string.Format("");
+            settings_csv.AppendLine(newLine);
+
+            newLine = string.Format("Irradience, {0}", irradience.Text);
+            settings_csv.AppendLine(newLine);
+
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Comma separated value (*.csv)|*.csv";
 
@@ -246,6 +254,8 @@ namespace QuadSMU_control
             string[] active_area = read_lines[6].Split(",");
             string[] polarity = read_lines[7].Split(",");
             string[] hold = read_lines[8].Split(",");
+            string[] str_irradience = read_lines[10].Split(",");
+
 
             ch1_start_v.Text = start_v[1];
             ch2_start_v.Text = start_v[2];
@@ -291,6 +301,9 @@ namespace QuadSMU_control
             ch2_hold_box.SelectedIndex = int.Parse(hold[2]);
             ch3_hold_box.SelectedIndex = int.Parse(hold[3]);
             ch4_hold_box.SelectedIndex = int.Parse(hold[4]);
+
+            irradience.Text = str_irradience[1];
+
 
         }
 
@@ -351,6 +364,8 @@ namespace QuadSMU_control
             stability_params.ch2_hold_state = ch2_hold_box.SelectedIndex;
             stability_params.ch3_hold_state = ch3_hold_box.SelectedIndex;
             stability_params.ch4_hold_state = ch4_hold_box.SelectedIndex;
+
+            stability_params.stability_irradience = double.Parse(irradience.Text);
 
             stability_params.params_accessed_count++;
         }
