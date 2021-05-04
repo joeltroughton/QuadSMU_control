@@ -50,7 +50,7 @@ namespace QuadSMU_control
 
         bool measurement_in_progress;
 
-        double stability_timer;
+        double stability_interval_secs;
 
         stability_sweep_parameters stability_sweep_params = new stability_sweep_parameters();
 
@@ -182,7 +182,7 @@ namespace QuadSMU_control
                     double vIntercept = lastNegativeV - (jscSlope * lastNegativeJ);
                     double jsc = (0 - vIntercept) / jscSlope;
 
-                    this.jsc = Math.Round((Math.Abs(jsc)), 2);
+                    this.jsc = Math.Round((Math.Abs(jsc)), 3);
                 }
 
             }
@@ -672,12 +672,12 @@ namespace QuadSMU_control
         {
             // Start timer
 
-            stability_timer = double.Parse(stability_interval_mins.Text) * 60;
-            String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_timer).ToString("HH:mm:ss"));
+            stability_interval_secs = double.Parse(stability_interval_mins.Text) * 60;
+            String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_interval_secs).ToString("HH:mm:ss"));
             stability_countdown_textbox.Text = next_measurement;
 
 
-            stabilityTimer.Interval = TimeSpan.FromSeconds(stability_timer);
+            stabilityTimer.Interval = TimeSpan.FromSeconds(stability_interval_secs);
             stabilityTimer.Tick += stability_timer_Tick;
             stabilityTimer.Start();
 
@@ -688,6 +688,11 @@ namespace QuadSMU_control
         void stability_timer_Tick(object sender, EventArgs e)
         {
             run_scheduled_measurements();
+            stabilityTimer.Start();
+
+            String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_interval_secs).ToString("HH:mm:ss"));
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { stability_countdown_textbox.Text = next_measurement; });
+
 
         }
 
@@ -698,7 +703,7 @@ namespace QuadSMU_control
             bool ch3_enabled = (bool)smu_ch_3_box.IsChecked;
             bool ch4_enabled = (bool)smu_ch_4_box.IsChecked;
 
-            stabilityTimer.Stop();
+            //stabilityTimer.Stop();
             renderTimer.Start();
 
 
@@ -796,10 +801,6 @@ namespace QuadSMU_control
             }
 
             renderTimer.Stop();
-            stabilityTimer.Start();
-
-            String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_timer).ToString("HH:mm:ss"));
-            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { stability_countdown_textbox.Text = next_measurement; });
 
         }
 
@@ -889,13 +890,13 @@ namespace QuadSMU_control
 
             if (!File.Exists(datadir))
             {
-                String header1 = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), ");
-                csv.AppendLine(header1);
+                String header = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%)");
+                csv.AppendLine(header);
             }
 
-            String header2 = String.Format("{0}, {1}, {2}, {3}, {4}", ivcurve.start_timestamp, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce);
+            String stats = String.Format("{0}, {1}, {2}, {3}, {4}", ivcurve.start_timestamp, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce);
 
-            csv.AppendLine(header2);
+            csv.AppendLine(stats);
 
 
             File.AppendAllText(datadir, csv.ToString());
