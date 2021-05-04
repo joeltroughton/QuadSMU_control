@@ -21,8 +21,7 @@ using System.Threading.Channels;
 using ScottPlot;
 using System.Windows.Forms;
 using System.Data;
-using CsvHelper;
-using System.Globalization;
+
 
 namespace QuadSMU_control
 {
@@ -59,6 +58,7 @@ namespace QuadSMU_control
 
         public class iv_curve
         {
+
             public List<double> voltage = new List<double>();
             public List<double> current = new List<double>();
             public List<double> power = new List<double>();
@@ -296,7 +296,9 @@ namespace QuadSMU_control
             temp_voltage_list.Clear();
             temp_current_list.Clear();
 
+            Debug.Print("Sending levels");
             await Task.Run(() => send_levels(jv_scan));
+            Debug.Print("JV sweep completed");
 
             jv_scan.voltage = temp_voltage_list.ToList();
             jv_scan.current = temp_current_list.ToList();
@@ -325,7 +327,7 @@ namespace QuadSMU_control
 
             //renderTimer.Stop();
 
-            jv_export(jv_scan);
+            //jv_export(jv_scan);
 
             return jv_scan;
         }
@@ -369,10 +371,10 @@ namespace QuadSMU_control
 
         private async void UpdateData(string inLine)
         {
-            Debug.Print("Recieved: {0}", inLine);
 
             string str = inLine.Substring(0, inLine.Length);
             str = str.Replace("\0", string.Empty);
+            Debug.Print("Recieved: {0}", str);
 
             double active_area = double.Parse(active_area_textbox.Text);
 
@@ -408,6 +410,23 @@ namespace QuadSMU_control
 
             double[] voltage_step_array = new double[number_of_steps + 2]; // 2 extra steps because we want to measure the start and the end voltagess
 
+            //Set current limit & OSR, then set the voltage to 0 and enable the output
+            string send = String.Format("CH{0}:CUR {1}", new_curve.smu_channel, new_curve.i_limit);
+            sp.WriteLine(send);
+            await Task.Delay(5);
+
+            send = String.Format("CH{0}:OSR {1}", new_curve.smu_channel, new_curve.osr);
+            sp.WriteLine(send);
+            await Task.Delay(5);
+
+            send = String.Format("CH{0}:VOL 0", new_curve.smu_channel);
+            sp.WriteLine(send);
+            await Task.Delay(10);
+
+            send = String.Format("CH{0}:ENA", new_curve.smu_channel);
+            sp.WriteLine(send);
+            await Task.Delay(10);
+
             new_curve.set_start_timestamp();
 
             for (int i = 0; i < number_of_steps + 2; i++)
@@ -418,16 +437,26 @@ namespace QuadSMU_control
 
             foreach (float voltage in voltage_step_array)
             {
-                string send = String.Format("CH{0}:MEA:VOL {1}", new_curve.smu_channel, voltage);
+                send = String.Format("CH{0}:MEA:VOL {1}", new_curve.smu_channel, voltage);
                 replyRecieved = false;
                 Debug.Print("Sending: {0}", send);
                 sp.WriteLine(send);
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+
 
                 while (!replyRecieved)
                 {
-                    Debug.Print("waiting...");
-                    await Task.Delay(25);
+                    //Debug.Print("waiting...");
+                    await Task.Delay(1);
                 }
+
+                while (watch.ElapsedMilliseconds < new_curve.step_delay)
+                {
+                    Debug.Print("Waiting for step delay: {0}ms", watch.ElapsedMilliseconds);
+                    await Task.Delay(1);
+                }
+                Debug.Print("Step delay condition met: {0}ms", watch.ElapsedMilliseconds);
+                watch.Stop();
                 replyRecieved = false;
             }
 
@@ -635,7 +664,7 @@ namespace QuadSMU_control
                 await call_measurement(ch1_jv).ConfigureAwait(false);
                 set_hold_voltage(ch1_jv);
                 add_stability_to_csv("C:\\data\\quad\\test.csv", ch1_jv);
-                export_jv_csv("C:\\data\\quad\\test.csv", ch1_jv);
+                jv_export("C:\\data\\quad\\test.csv", ch1_jv);
             }
 
             if (ch2_enabled)
@@ -657,7 +686,7 @@ namespace QuadSMU_control
                 call_measurement(ch2_jv);
                 set_hold_voltage(ch2_jv);
                 add_stability_to_csv("", ch2_jv);
-                export_jv_csv("", ch2_jv);
+                jv_export("", ch2_jv);
             }
 
             if (ch3_enabled)
@@ -679,7 +708,7 @@ namespace QuadSMU_control
                 call_measurement(ch3_jv);
                 set_hold_voltage(ch3_jv);
                 add_stability_to_csv("", ch3_jv);
-                export_jv_csv("", ch3_jv);
+                jv_export("", ch3_jv);
             }
 
             if (ch4_enabled)
@@ -701,7 +730,7 @@ namespace QuadSMU_control
                 call_measurement(ch4_jv);
                 set_hold_voltage(ch4_jv);
                 add_stability_to_csv("", ch4_jv);
-                export_jv_csv("", ch4_jv);
+                jv_export("", ch4_jv);
             }
 
             renderTimer.Stop();
@@ -718,23 +747,6 @@ namespace QuadSMU_control
             // Find the csvfile at filenamedir and add the PV params from ivcurve
         }
 
-        void export_jv_csv(String datadir, iv_curve ivcurve)
-        {
-            Debug.Print("exporting JV");
-            // Export the JV curve as a CSV at the datadir location
-            using (FileStream fs = File.Create(datadir))
-            {
-
-            }
-
-            using (var writer = new StreamWriter(datadir))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            {
-                csv.WriteRecords(ivcurve.voltage);
-            }
-
-
-        }
 
         void set_hold_voltage(iv_curve ivcurve)
         {
@@ -783,12 +795,20 @@ namespace QuadSMU_control
             return iv_profile;
         }
 
-        private void jv_export(iv_curve sweep)
+        private void jv_export(string datadir, iv_curve ivcurve)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
             var csv = new StringBuilder();
 
-            double[] voltage_array = sweep.voltage.ToArray();
-            double[] current_array = sweep.current.ToArray();
+            double[] voltage_array = ivcurve.voltage.ToArray();
+            double[] current_array = ivcurve.current.ToArray();
+
+            String header1 = String.Format("Device ID, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Timestamp");
+            String header2 = String.Format("{0}, {1}, {2}, {3}, {4}, {5}", ivcurve.device_name, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce, ivcurve.start_timestamp);
+
+            csv.AppendLine(header1);
+            csv.AppendLine(header2);
 
             for (int i = 0; i < voltage_array.Length; i++)
             {
@@ -798,8 +818,10 @@ namespace QuadSMU_control
                 csv.AppendLine(newLine);
             }
 
-            File.WriteAllText("C:/data/output.csv", csv.ToString());
+            File.WriteAllText(datadir, csv.ToString());
 
+            watch.Stop();
+            Debug.Print("jv_export took {0}ms", watch.ElapsedMilliseconds);
 
         }
     }
