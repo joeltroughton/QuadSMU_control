@@ -517,6 +517,7 @@ namespace QuadSMU_control
             }
         }
 
+
         private void updateDatagrid(iv_curve most_recent_iv_curve)
         {
 
@@ -591,6 +592,7 @@ namespace QuadSMU_control
             stabilityTimer.Tick += stability_timer_Tick;
             stabilityTimer.Start();
 
+
         }
 
 
@@ -610,37 +612,95 @@ namespace QuadSMU_control
             stabilityTimer.Stop();
             renderTimer.Start();
 
-            //if (ch1_enabled)
-            //{
-            //    iv_curve ch1_curve = await call_measurement(1, false).ConfigureAwait(false);
-            //    set_hold_voltage(1, ch1_curve);
-            //    add_stability_to_csv("", ch1_curve);
-            //    export_jv_csv("", ch1_curve);
-            //}
 
-            //if (ch2_enabled)
-            //{
-            //    iv_curve ch2_curve = await call_measurement(1, false).ConfigureAwait(false);
-            //    set_hold_voltage(2, ch2_curve);
-            //    add_stability_to_csv("", ch2_curve);
-            //    export_jv_csv("", ch2_curve);
-            //}
 
-            //if (ch3_enabled)
-            //{
-            //    iv_curve ch3_curve = await call_measurement(3, false).ConfigureAwait(false);
-            //    set_hold_voltage(3, ch3_curve);
-            //    add_stability_to_csv("", ch3_curve);
-            //    export_jv_csv("", ch3_curve);
-            //}
+            if (ch1_enabled)
+            {
+                iv_curve ch1_jv = new iv_curve();
+                ch1_jv = generate_measurement_profile(
+                    "device name",
+                    1,
+                    stability_sweep_params.ch1_start_v,
+                    stability_sweep_params.ch1_end_v,
+                    stability_sweep_params.ch1_step_mv,
+                    stability_sweep_params.ch1_delay_ms,
+                    stability_sweep_params.ch1_ilim_ma,
+                    stability_sweep_params.ch1_osr,
+                    stability_sweep_params.ch1_area_cm2,
+                    stability_sweep_params.ch1_polarity,
+                    stability_sweep_params.ch1_hold_state);
 
-            //if (ch4_enabled)
-            //{
-            //    iv_curve ch4_curve = await call_measurement(4, false).ConfigureAwait(false);
-            //    set_hold_voltage(4, ch4_curve);
-            //    add_stability_to_csv("", ch4_curve);
-            //    export_jv_csv("", ch4_curve);
-            //}
+                call_measurement(ch1_jv);
+                set_hold_voltage(ch1_jv);
+                add_stability_to_csv("", ch1_jv);
+                export_jv_csv("", ch1_jv);
+            }
+
+            if (ch2_enabled)
+            {
+                iv_curve ch2_jv = new iv_curve();
+                ch2_jv = generate_measurement_profile(
+                    "device name",
+                    1,
+                    stability_sweep_params.ch2_start_v,
+                    stability_sweep_params.ch2_end_v,
+                    stability_sweep_params.ch2_step_mv,
+                    stability_sweep_params.ch2_delay_ms,
+                    stability_sweep_params.ch2_ilim_ma,
+                    stability_sweep_params.ch2_osr,
+                    stability_sweep_params.ch2_area_cm2,
+                    stability_sweep_params.ch2_polarity,
+                    stability_sweep_params.ch2_hold_state);
+
+                call_measurement(ch2_jv);
+                set_hold_voltage(ch2_jv);
+                add_stability_to_csv("", ch2_jv);
+                export_jv_csv("", ch2_jv);
+            }
+
+            if (ch3_enabled)
+            {
+                iv_curve ch3_jv = new iv_curve();
+                ch3_jv = generate_measurement_profile(
+                    "device name",
+                    1,
+                    stability_sweep_params.ch3_start_v,
+                    stability_sweep_params.ch3_end_v,
+                    stability_sweep_params.ch3_step_mv,
+                    stability_sweep_params.ch3_delay_ms,
+                    stability_sweep_params.ch3_ilim_ma,
+                    stability_sweep_params.ch3_osr,
+                    stability_sweep_params.ch3_area_cm2,
+                    stability_sweep_params.ch3_polarity,
+                    stability_sweep_params.ch3_hold_state);
+
+                call_measurement(ch3_jv);
+                set_hold_voltage(ch3_jv);
+                add_stability_to_csv("", ch3_jv);
+                export_jv_csv("", ch3_jv);
+            }
+
+            if (ch4_enabled)
+            {
+                iv_curve ch4_jv = new iv_curve();
+                ch4_jv = generate_measurement_profile(
+                    "device name",
+                    1,
+                    stability_sweep_params.ch4_start_v,
+                    stability_sweep_params.ch4_end_v,
+                    stability_sweep_params.ch4_step_mv,
+                    stability_sweep_params.ch4_delay_ms,
+                    stability_sweep_params.ch4_ilim_ma,
+                    stability_sweep_params.ch4_osr,
+                    stability_sweep_params.ch4_area_cm2,
+                    stability_sweep_params.ch4_polarity,
+                    stability_sweep_params.ch4_hold_state);
+
+                call_measurement(ch4_jv);
+                set_hold_voltage(ch4_jv);
+                add_stability_to_csv("", ch4_jv);
+                export_jv_csv("", ch4_jv);
+            }
 
             renderTimer.Stop();
             stabilityTimer.Start();
@@ -661,7 +721,7 @@ namespace QuadSMU_control
             // Export the JV curve as a CSV at the datadir location
         }
 
-        void set_hold_voltage(int smu_channel, iv_curve ivcurve)
+        void set_hold_voltage(iv_curve ivcurve)
         {
             // Apply the hold voltage to the SMU channel in question
         }
@@ -671,7 +731,6 @@ namespace QuadSMU_control
             stability_settings stability_param_dialog = new stability_settings(stability_sweep_params);
 
             stability_param_dialog.Show();
-
         }
 
         public void collect_params()
