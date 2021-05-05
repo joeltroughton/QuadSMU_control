@@ -2,6 +2,7 @@
                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:Fluent="urn:fluent-ribbon"
+                     xmlns:fa5="http://schemas.fontawesome.com/icons/"
                      Title="My first RibbonWindow" 
                      Width="800" 
                      Height="600">
@@ -69,13 +70,32 @@
                     </Grid>
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="Stability control" Width="100" HorizontalContentAlignment="Center">
-                    <Grid VerticalAlignment="Center" MinHeight="120">
+                <Fluent:RibbonGroupBox Header="Stability control"  HorizontalContentAlignment="Center">
+                    <Grid VerticalAlignment="Center">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+
                         </Grid.RowDefinitions>
 
-                        <Fluent:Button Grid.Row="0" Click="run_stability_button" Header="Run" FontSize="20" VerticalAlignment="Center" Margin="0,0,0,20"/>
+                        <Fluent:Button Grid.Row="0" Size="Middle" Click="run_stability_button" Header="Start timer">
+                            <Fluent:Button.Icon>
+                                <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Green"/>
+                            </Fluent:Button.Icon>
+                        </Fluent:Button>
+
+                        <Fluent:Button Grid.Row="1" Size="Middle" Click="run_stability_button" Header="Stop timer">
+                            <Fluent:Button.Icon>
+                                <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="OrangeRed"/>
+                            </Fluent:Button.Icon>
+                        </Fluent:Button>
+
+                        <Fluent:Button Grid.Row="2" Size="Middle" Click="run_stability_button" Header="Measure now">
+                            <Fluent:Button.Icon>
+                                <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="Orange"/>
+                            </Fluent:Button.Icon>
+                        </Fluent:Button>
 
                     </Grid>
                 </Fluent:RibbonGroupBox>
@@ -98,8 +118,14 @@
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
                     <Grid>
-                        <Fluent:ComboBox x:Name="smu_channel_box" Width="100" Margin="0,27,5,0" IsEditable="False" SelectedIndex="0"/>
-
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        
+                        <Fluent:ComboBox Grid.Row="0" Size="Middle" x:Name="smu_channel_box" Width="100" IsEditable="False" SelectedIndex="0"/>
+                        <Fluent:Button Grid.Row="1" Size="Large" x:Name="iv_savedir_box" Header="Save" LargeIcon="C:\Users\Joel\Pictures\cio1.png" />
+                        
                     </Grid>
                 </Fluent:RibbonGroupBox>
 
@@ -149,13 +175,15 @@
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="Sweep control" Width="100" HorizontalContentAlignment="Center">
-                    <Grid VerticalAlignment="Center" MinHeight="120">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
 
-                        <Fluent:Button Grid.Row="0" Click="run_iv_button" Header="Run" FontSize="20" VerticalAlignment="Center" Margin="0,0,0,20"/>
-                    </Grid>
+                        <Fluent:Button Size="Middle" Click="run_iv_button" Header="Run">
+                            <Fluent:Button.Icon>
+                            <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Green"/>
+                        </Fluent:Button.Icon>
+                        </Fluent:Button>
+                    
+                    
+
                 </Fluent:RibbonGroupBox>
 
             </Fluent:RibbonTabItem>
