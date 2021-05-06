@@ -257,7 +257,7 @@
 
                 <WpfPlot Name="jvPlot" Margin="10" Grid.Row="0"/>
 
-                <DataGrid x:Name="iv_datagrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Extended">
+                <DataGrid x:Name="iv_datagrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Extended" >
                     <DataGrid.Columns>
                         <DataGridCheckBoxColumn Header="Plot" Binding="{Binding IsSelected}" />
                         <DataGridTextColumn Header="Device ID" Binding="{Binding Path=cell_name}" Width="*" />

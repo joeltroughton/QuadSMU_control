@@ -353,7 +353,7 @@ namespace QuadSMU_control
             jv_scan.calc_fill_factor();
             jv_scan.calc_pce();
 
-            updateDatagrid(jv_scan);
+            //updateDatagrid(jv_scan);
 
             Debug.Print("VOC: {0}, JSC: {1}, FF: {2}, PCE: {3}", jv_scan.voc, jv_scan.jsc, jv_scan.fill_factor, jv_scan.pce);
 
@@ -604,10 +604,13 @@ namespace QuadSMU_control
                 );
 
                 string iv_output_path = String.Format("{0}\\{1}.dat", iv_save_datadir, device_name);
-                Debug.Print("Output file:{0}", iv_output_path);
                 await call_measurement(single_jv).ConfigureAwait(false);
-                add_stats_to_csv(iv_save_datadir, single_jv);
-                jv_export("C:\\data\\quad\\test.csv", single_jv);
+
+                jv_export(iv_output_path, single_jv);
+                add_iv_stats_to_csv(iv_save_datadir, single_jv);
+
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(single_jv); });
+
             }
         }
 
@@ -625,6 +628,8 @@ namespace QuadSMU_control
             };
 
             iv_datagrid.Items.Add(data);
+            //iv_datagrid.BringIntoView();
+
         }
 
         void RenderGraph(object sender, EventArgs e)
@@ -732,7 +737,7 @@ namespace QuadSMU_control
 
                 await call_measurement(ch1_jv).ConfigureAwait(false);
                 set_hold_voltage(ch1_jv);
-                add_stats_to_csv("C:\\data\\quad\\stats.csv", ch1_jv);
+                add_stability_stats_to_csv("C:\\data\\quad\\stats.csv", ch1_jv);
                 jv_export("C:\\data\\quad\\test.csv", ch1_jv);
             }
 
@@ -755,7 +760,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch2_jv);
                 set_hold_voltage(ch2_jv);
-                add_stats_to_csv("", ch2_jv);
+                add_stability_stats_to_csv("", ch2_jv);
                 jv_export("", ch2_jv);
             }
 
@@ -778,7 +783,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch3_jv);
                 set_hold_voltage(ch3_jv);
-                add_stats_to_csv("", ch3_jv);
+                add_stability_stats_to_csv("", ch3_jv);
                 jv_export("", ch3_jv);
             }
 
@@ -801,7 +806,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch4_jv);
                 set_hold_voltage(ch4_jv);
-                add_stats_to_csv("", ch4_jv);
+                add_stability_stats_to_csv("", ch4_jv);
                 jv_export("", ch4_jv);
             }
 
@@ -881,13 +886,20 @@ namespace QuadSMU_control
                 csv.AppendLine(newLine);
             }
 
+            if (File.Exists(datadir))
+            {
+                datadir = datadir.Substring(0, datadir.Length-4);
+                Debug.Print("{0}", datadir);
+                datadir = String.Format("{0}_{1}.dat", datadir, ivcurve.start_timestamp);
+                ivcurve.device_name = String.Format("{0}_{1}", ivcurve.device_name, ivcurve.start_timestamp);
+            }
             File.WriteAllText(datadir, csv.ToString());
 
             watch.Stop();
             Debug.Print("jv_export took {0}ms", watch.ElapsedMilliseconds);
         }
 
-        private void add_stats_to_csv(string datadir, iv_curve ivcurve)
+        private void add_stability_stats_to_csv(string datadir, iv_curve ivcurve)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -900,6 +912,31 @@ namespace QuadSMU_control
             }
 
             String stats = String.Format("{0}, {1}, {2}, {3}, {4}", ivcurve.start_timestamp, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce);
+
+            csv.AppendLine(stats);
+
+
+            File.AppendAllText(datadir, csv.ToString());
+
+            watch.Stop();
+            Debug.Print("add_stability_stats_to_csv took {0}ms", watch.ElapsedMilliseconds);
+        }
+
+        private void add_iv_stats_to_csv(string datadir, iv_curve ivcurve)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            var csv = new StringBuilder();
+
+            datadir = String.Format("{0}\\Channel{1}_stats.csv", datadir, ivcurve.smu_channel);
+
+            if (!File.Exists(datadir))
+            {
+                String header = String.Format("Cell ID, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%)");
+                csv.AppendLine(header);
+            }
+
+            String stats = String.Format("{0}, {1}, {2}, {3}, {4}", ivcurve.device_name, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce);
 
             csv.AppendLine(stats);
 
@@ -943,6 +980,7 @@ namespace QuadSMU_control
 
             Debug.Print("Data directory: {0}", iv_save_datadir);
         }
+
     }
 }
 
