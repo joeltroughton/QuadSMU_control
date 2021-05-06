@@ -21,7 +21,7 @@ using System.Threading.Channels;
 using ScottPlot;
 using System.Windows.Forms;
 using System.Data;
-
+using WinForms = System.Windows.Forms;
 
 namespace QuadSMU_control
 {
@@ -51,6 +51,8 @@ namespace QuadSMU_control
         bool measurement_in_progress;
 
         double stability_interval_secs;
+
+        string iv_save_datadir;
 
         stability_sweep_parameters stability_sweep_params = new stability_sweep_parameters();
 
@@ -566,7 +568,7 @@ namespace QuadSMU_control
 
         }
 
-        private void run_iv_button(object sender, RoutedEventArgs e)
+        private async void run_iv_button(object sender, RoutedEventArgs e)
         {
             if (!measurement_in_progress)
             {
@@ -601,8 +603,11 @@ namespace QuadSMU_control
                    hold_state
                 );
 
-
-                call_measurement(single_jv);
+                string iv_output_path = String.Format("{0}\\{1}.dat", iv_save_datadir, device_name);
+                Debug.Print("Output file:{0}", iv_output_path);
+                await call_measurement(single_jv).ConfigureAwait(false);
+                add_stats_to_csv(iv_save_datadir, single_jv);
+                jv_export("C:\\data\\quad\\test.csv", single_jv);
             }
         }
 
@@ -727,7 +732,7 @@ namespace QuadSMU_control
 
                 await call_measurement(ch1_jv).ConfigureAwait(false);
                 set_hold_voltage(ch1_jv);
-                add_stability_stats_to_csv("C:\\data\\quad\\stats.csv", ch1_jv);
+                add_stats_to_csv("C:\\data\\quad\\stats.csv", ch1_jv);
                 jv_export("C:\\data\\quad\\test.csv", ch1_jv);
             }
 
@@ -750,7 +755,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch2_jv);
                 set_hold_voltage(ch2_jv);
-                add_stability_stats_to_csv("", ch2_jv);
+                add_stats_to_csv("", ch2_jv);
                 jv_export("", ch2_jv);
             }
 
@@ -773,7 +778,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch3_jv);
                 set_hold_voltage(ch3_jv);
-                add_stability_stats_to_csv("", ch3_jv);
+                add_stats_to_csv("", ch3_jv);
                 jv_export("", ch3_jv);
             }
 
@@ -796,7 +801,7 @@ namespace QuadSMU_control
 
                 call_measurement(ch4_jv);
                 set_hold_voltage(ch4_jv);
-                add_stability_stats_to_csv("", ch4_jv);
+                add_stats_to_csv("", ch4_jv);
                 jv_export("", ch4_jv);
             }
 
@@ -882,7 +887,7 @@ namespace QuadSMU_control
             Debug.Print("jv_export took {0}ms", watch.ElapsedMilliseconds);
         }
 
-        private void add_stability_stats_to_csv(string datadir, iv_curve ivcurve)
+        private void add_stats_to_csv(string datadir, iv_curve ivcurve)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -904,8 +909,43 @@ namespace QuadSMU_control
             watch.Stop();
             Debug.Print("add_stability_stats_to_csv took {0}ms", watch.ElapsedMilliseconds);
         }
+
+        private void stability_savedir_button(object sender, RoutedEventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            stability_savedir.Text = dialog.SelectedPath;
+        }
+
+        private void stop_iv_button(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void open_iv_datadir_button(object sender, RoutedEventArgs e)
+        {
+            string open_folder_directory = iv_save_datadir;
+
+            if (Directory.Exists(open_folder_directory))
+            {
+                Process.Start("explorer.exe", open_folder_directory);
+            }
+
+        }
+
+        private void save_iv_datadir_button(object sender, RoutedEventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            iv_save_datadir = dialog.SelectedPath;
+
+            Debug.Print("Data directory: {0}", iv_save_datadir);
+        }
     }
-
-
 }
+
+
+
 

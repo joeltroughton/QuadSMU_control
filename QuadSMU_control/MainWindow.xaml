@@ -3,7 +3,7 @@
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:Fluent="urn:fluent-ribbon"
                      xmlns:fa5="http://schemas.fontawesome.com/icons/"
-                     Title="My first RibbonWindow" 
+                     Title="QuadSMU Control" 
                      Width="800" 
                      Height="600">
     <Grid>
@@ -18,7 +18,7 @@
 
 
             <!--Backstage-->
-            <Fluent:Ribbon.Menu>
+            <!--<Fluent:Ribbon.Menu>
                 <Fluent:Backstage>
                     <Fluent:BackstageTabControl>
                         <Fluent:BackstageTabItem Header="New" />
@@ -27,7 +27,7 @@
 
                     </Fluent:BackstageTabControl>
                 </Fluent:Backstage>
-            </Fluent:Ribbon.Menu>
+            </Fluent:Ribbon.Menu>-->
 
             <!--Tabs-->
 
@@ -37,11 +37,19 @@
                     <Fluent:CheckBox  Header="Ch 1" x:Name="smu_ch_1_box" />
                     <Fluent:CheckBox  Header="Ch 2" x:Name="smu_ch_2_box"/>
                     <Fluent:CheckBox  Header="Ch 3" x:Name="smu_ch_3_box"/>
-                    <Fluent:CheckBox  Header="Ch 4" x:Name="smu_ch_4_box"/>
+                    <Fluent:CheckBox  Header="Ch 4" x:Name="smu_ch_4_box"/>                  
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="J-V scan">
-                    <Fluent:Button  Header="Change scan parameters" Margin="0,-15,0,0" Click="stability_params_button" />
+
+                    <Fluent:Button Size="Large" Click="stability_params_button" Header="Change scan parameters">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Cog" Foreground="CornflowerBlue"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+
+
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="Stability parameters">
@@ -55,16 +63,21 @@
                         </Grid.RowDefinitions>
 
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="95"/>
-                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Interval (mins)" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
-                        <Fluent:TextBox Grid.Row="0" x:Name="stability_interval_mins" Width="50" Text="0" Grid.ColumnSpan="2" Height="22" Margin="95,0,0,0" VerticalAlignment="Top"/>
+                        <Fluent:TextBox Grid.Row="0" Grid.Column="1" x:Name="stability_interval_mins" Text="10" Width="40"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"  Grid.ColumnSpan="2" Text="Save directory" HorizontalAlignment="Left" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
-                        <Fluent:TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" x:Name="stability_savedir" BorderThickness="0"  Text="C:\data" HorizontalAlignment="Left" Width="150" Margin="-5,0,0,0"/>
+                        <Fluent:TextBox Grid.Row="2" Grid.Column="0" x:Name="stability_savedir" Width="120"  Text="C:\data" HorizontalAlignment="Left"  Margin="-5,0,0,0"/>
 
+                        <Fluent:Button Grid.Row="2" Grid.Column="1" Size="Small" Click="stability_savedir_button" HorizontalAlignment="Center">
+                            <Fluent:Button.Icon>
+                                <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
+                            </Fluent:Button.Icon>
+                        </Fluent:Button>
 
 
                     </Grid>
@@ -81,19 +94,19 @@
 
                         <Fluent:Button Grid.Row="0" Size="Middle" Click="run_stability_button" Header="Start timer">
                             <Fluent:Button.Icon>
-                                <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Green"/>
+                                <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="LimeGreen"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
                         <Fluent:Button Grid.Row="1" Size="Middle" Click="run_stability_button" Header="Stop timer">
                             <Fluent:Button.Icon>
-                                <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="OrangeRed"/>
+                                <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="Crimson"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
                         <Fluent:Button Grid.Row="2" Size="Middle" Click="run_stability_button" Header="Measure now">
                             <Fluent:Button.Icon>
-                                <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="Orange"/>
+                                <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Orange"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
@@ -117,16 +130,14 @@
             <Fluent:RibbonTabItem Header="I-V sweep">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        
-                        <Fluent:ComboBox Grid.Row="0" Size="Middle" x:Name="smu_channel_box" Width="100" IsEditable="False" SelectedIndex="0"/>
-                        <Fluent:Button Grid.Row="1" Size="Large" x:Name="iv_savedir_box" Header="Save" LargeIcon="C:\Users\Joel\Pictures\cio1.png" />
-                        
-                    </Grid>
+
+
+                        <Fluent:ComboBox Size="Large" x:Name="smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0">
+
+                            
+                        </Fluent:ComboBox>
+
+
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="I-V sweep setup">
@@ -174,15 +185,33 @@
                     </Grid>
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="Sweep control" Width="100" HorizontalContentAlignment="Center">
+                <Fluent:RibbonGroupBox Header="Sweep control"  HorizontalContentAlignment="Center">
 
-                        <Fluent:Button Size="Middle" Click="run_iv_button" Header="Run">
-                            <Fluent:Button.Icon>
-                            <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Green"/>
-                        </Fluent:Button.Icon>
-                        </Fluent:Button>
-                    
-                    
+                    <Fluent:Button Grid.Row="1" Size="Large" Click="save_iv_datadir_button" Header="Select save directory">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button Size="Large" Click="run_iv_button" Header="Run I-V sweep">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button Size="Large" Click="stop_iv_button" Header="Abort I-V sweep">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="Crimson"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button Size="Large" Click="open_iv_datadir_button" Header="Open save directory">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_FolderOpen" Foreground="CornflowerBlue"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+
 
                 </Fluent:RibbonGroupBox>
 
@@ -192,13 +221,24 @@
 
                 <Fluent:RibbonGroupBox Header="Port select" Width="100" Grid.IsSharedSizeScope="True">
 
-                    <Fluent:ComboBox Grid.Row="0" x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1"/>
+                    <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1" Margin="0,25,0,0"/>
 
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Grid.IsSharedSizeScope="True">
-                    <Fluent:Button Header="Connect" Click="connect_Click"/>
-                    <Fluent:Button Header="Disconnect" Click="disconnect_Click"/>
+                <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True">
+                    
+                    <Fluent:Button Size="Large" Click="connect_Click" Header="Connect">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button Size="Large" Click="disconnect_Click" Header="Disconnect">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Unlink" Foreground="Crimson"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
                 </Fluent:RibbonGroupBox>
 
             </Fluent:RibbonTabItem>
