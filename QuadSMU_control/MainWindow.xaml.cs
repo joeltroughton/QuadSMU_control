@@ -49,6 +49,8 @@ namespace QuadSMU_control
         bool replyRecieved;
 
         bool measurement_in_progress;
+        bool listen_for_data = false;
+        bool cancel_iv_scan = false;
 
         double stability_interval_secs;
 
@@ -114,21 +116,26 @@ namespace QuadSMU_control
 
                 int lastPositiveIndex = 0;
 
-                for (int i = 1; i < voltage_array.Count(); i++)
+                for (int i = 1; i < voltage_array.Count() - 1; i++)
                 {
                     if (current_array[i] > 0)
                     {
                         lastPositiveJ = current_array[i];
-                        lastPositiveIndex = i;
-
                         lastPositiveV = voltage_array[i];
 
                         firstNegativeJ = current_array[i + 1];
                         firstNegativeV = voltage_array[i + 1];
                     }
+
+                    else if (current_array[i] < 0)
+                    {
+                        lastPositiveIndex = i;
+                        break;
+                    }
+
                 }
 
-                if (firstNegativeV == 0)
+                if (lastPositiveIndex == 0)
                 {
                     this.voc = 0;
                     Debug.Print("Curve never passes through 0A. Don't calculate VOC");
@@ -160,8 +167,9 @@ namespace QuadSMU_control
                 double firstPositiveV = 0;
                 double firstPositiveJ = 0;
 
+                int lastPositiveIndex = 0;
 
-                for (int i = 1; i < voltage_array.Count(); i++)
+                for (int i = 1; i < voltage_array.Count() - 1; i++)
                 {
                     if (voltage_array[i] > 0)
                     {
@@ -171,9 +179,15 @@ namespace QuadSMU_control
                         firstPositiveV = voltage_array[i + 1];
                         firstPositiveJ = current_array[i + 1];
                     }
+
+                    else if (voltage_array[i] < 0)
+                    {
+                        lastPositiveIndex = i;
+                        break;
+                    }
                 }
 
-                if (lastNegativeV == 0 || lastNegativeJ == 0 || firstPositiveV == 0 || firstPositiveJ == 0)
+                if (lastPositiveIndex == 0)
                 {
                     this.jsc = 0;
                     Debug.Print("Curve never passes through 0V. Don't calculate JSC");
@@ -410,28 +424,31 @@ namespace QuadSMU_control
 
         private async void UpdateData(string inLine)
         {
-
-            string str = inLine.Substring(0, inLine.Length);
-            str = str.Replace("\0", string.Empty);
-            Debug.Print("Recieved: {0}", str);
-
-            double active_area = double.Parse(active_area_textbox.Text);
-
-            try
+            if (listen_for_data)
             {
-                string[] parts = str.Split(',');
+                string str = inLine.Substring(0, inLine.Length);
+                str = str.Replace("\0", string.Empty);
+                Debug.Print("Recieved: {0}", str);
 
-                temp_voltage_list.Add(double.Parse(parts[0]));
-                temp_current_list.Add((double.Parse(parts[1]) / active_area) * 1000);
+                double active_area = double.Parse(active_area_textbox.Text);
 
-                dvoltageArray = temp_voltage_list.ToArray();
-                dcurrentArray = temp_current_list.ToArray();
+                try
+                {
+                    string[] parts = str.Split(',');
+
+                    temp_voltage_list.Add(double.Parse(parts[0]));
+                    temp_current_list.Add((double.Parse(parts[1]) / active_area) * 1000);
+
+                    dvoltageArray = temp_voltage_list.ToArray();
+                    dcurrentArray = temp_current_list.ToArray();
+                }
+
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error - Data from SMU not understood. {0}", ex);
+                }
             }
 
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error - Data from SMU not understood. {0}", ex);
-            }
         }
 
         private async Task send_levels(iv_curve new_curve)
@@ -479,23 +496,37 @@ namespace QuadSMU_control
             sp.WriteLine(send);
             await Task.Delay(5);
 
-            send = String.Format("CH{0}:OSR {1}", new_curve.smu_channel, new_curve.osr);
-            sp.WriteLine(send);
-            await Task.Delay(5);
-
-            send = String.Format("CH{0}:VOL {1}", new_curve.smu_channel, new_curve.start_v);
-            sp.WriteLine(send);
-            await Task.Delay(10);
-
             send = String.Format("CH{0}:ENA", new_curve.smu_channel);
             sp.WriteLine(send);
             await Task.Delay(10);
 
+            send = String.Format("CH{0}:OSR 1", new_curve.smu_channel);
+            sp.WriteLine(send);
+            await Task.Delay(5);
+
+            send = String.Format("CH{0}:MEA:VOL {1}", new_curve.smu_channel, new_curve.start_v);
+            sp.WriteLine(send);
+            await Task.Delay(50);
+
+            send = String.Format("CH{0}:OSR {1}", new_curve.smu_channel, new_curve.osr);
+            sp.WriteLine(send);
+            await Task.Delay(5);
+
+            sp.DiscardInBuffer();
+            sp.DiscardOutBuffer();
+
             new_curve.set_start_timestamp();
+            listen_for_data = true;
 
 
             foreach (double voltage in voltage_step_array)
             {
+                if (cancel_iv_scan)
+                {
+                    measurement_in_progress = false;
+                    listen_for_data = false;
+                    return;
+                }
                 send = String.Format("CH{0}:MEA:VOL {1:0.000}", new_curve.smu_channel, voltage);
                 replyRecieved = false;
                 Debug.Print("Sending: {0}", send);
@@ -523,7 +554,7 @@ namespace QuadSMU_control
 
             Debug.Print("finished");
             measurement_in_progress = false;
-
+            listen_for_data = false;
         }
 
         private void output_button_Click(object sender, RoutedEventArgs e)
@@ -572,6 +603,7 @@ namespace QuadSMU_control
         {
             if (!measurement_in_progress)
             {
+                cancel_iv_scan = false;
                 renderTimer.Start();
                 int smu_channel = smu_channel_box.SelectedIndex + 1;
                 double start_v = double.Parse(start_voltage.Text);
@@ -628,8 +660,11 @@ namespace QuadSMU_control
             };
 
             iv_datagrid.Items.Add(data);
-            //iv_datagrid.BringIntoView();
 
+            // Bring latest entry into focus
+            iv_datagrid.SelectedItem = iv_datagrid.Items[iv_datagrid.Items.Count - 1];
+            iv_datagrid.Focus();
+            iv_datagrid.ScrollIntoView(iv_datagrid.SelectedItem);
         }
 
         void RenderGraph(object sender, EventArgs e)
@@ -639,7 +674,7 @@ namespace QuadSMU_control
 
                 jvPlot.plt.Clear();
 
-                jvPlot.plt.PlotScatter(dvoltageArray, dcurrentArray, color: System.Drawing.Color.Red, lineWidth: 4, markerSize: 10);
+                jvPlot.plt.PlotScatter(dvoltageArray, dcurrentArray, color: System.Drawing.Color.CornflowerBlue, lineWidth: 4, markerSize: 10);
                 jvPlot.plt.PlotHLine(0, color: System.Drawing.Color.Black, lineWidth: 1);
                 jvPlot.plt.PlotVLine(0, color: System.Drawing.Color.Black, lineWidth: 1);
                 jvPlot.plt.AxisAuto(0.1, 0.1); // no horizontal padding, 50% vertical padding
@@ -888,7 +923,7 @@ namespace QuadSMU_control
 
             if (File.Exists(datadir))
             {
-                datadir = datadir.Substring(0, datadir.Length-4);
+                datadir = datadir.Substring(0, datadir.Length - 4);
                 Debug.Print("{0}", datadir);
                 datadir = String.Format("{0}_{1}.dat", datadir, ivcurve.start_timestamp);
                 ivcurve.device_name = String.Format("{0}_{1}", ivcurve.device_name, ivcurve.start_timestamp);
@@ -957,7 +992,7 @@ namespace QuadSMU_control
 
         private void stop_iv_button(object sender, RoutedEventArgs e)
         {
-
+            cancel_iv_scan = true;
         }
 
         private void open_iv_datadir_button(object sender, RoutedEventArgs e)
