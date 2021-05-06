@@ -31,7 +31,7 @@
 
             <!--Tabs-->
 
-            <Fluent:RibbonTabItem Header="Stability">
+            <Fluent:RibbonTabItem x:Name="stability_tab" Header="Stability" IsEnabled="True">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
                     <Fluent:CheckBox  Header="Ch 1" x:Name="smu_ch_1_box" />
@@ -92,19 +92,19 @@
 
                         </Grid.RowDefinitions>
 
-                        <Fluent:Button Grid.Row="0" Size="Middle" Click="run_stability_button" Header="Start timer">
+                        <Fluent:Button Grid.Row="0" Name="run_stability" Size="Middle" Click="run_stability_button" Header="Start timer" IsEnabled="True">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="LimeGreen"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
-                        <Fluent:Button Grid.Row="1" Size="Middle" Click="run_stability_button" Header="Stop timer">
+                        <Fluent:Button Grid.Row="1" Name="stop_stability" Size="Middle" Click="halt_stability_button" Header="Stop timer">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="Crimson"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
-                        <Fluent:Button Grid.Row="2" Size="Middle" Click="run_stability_button" Header="Measure now">
+                        <Fluent:Button Grid.Row="2" Size="Middle" Click="instant_stability_button" Header="Measure now">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Orange"/>
                             </Fluent:Button.Icon>
@@ -119,7 +119,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="0" Margin="0,25,0,0" x:Name="stability_countdown_textbox"/>
+                        <TextBlock Grid.Column="0" Text="Not running" TextWrapping="Wrap" Margin="0,25,0,0" Foreground="Crimson" x:Name="stability_countdown_textbox"/>
 
 
                     </Grid>
@@ -127,7 +127,7 @@
 
             </Fluent:RibbonTabItem>
 
-            <Fluent:RibbonTabItem Header="I-V sweep">
+            <Fluent:RibbonTabItem x:Name="iv_tab" Header="I-V sweep" IsEnabled="False">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
 
@@ -185,23 +185,11 @@
                     </Grid>
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="Sweep control"  HorizontalContentAlignment="Center">
+                <Fluent:RibbonGroupBox Header="Save"  HorizontalContentAlignment="Center">
 
                     <Fluent:Button Grid.Row="1" Size="Large" Click="save_iv_datadir_button" Header="Select save directory">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>
-
-                    <Fluent:Button Size="Large" Click="run_iv_button" Header="Run I-V sweep">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>
-
-                    <Fluent:Button Size="Large" Click="stop_iv_button" Header="Abort I-V sweep">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="Crimson"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
@@ -210,8 +198,21 @@
                             <fa5:ImageAwesome Icon="Solid_FolderOpen" Foreground="CornflowerBlue"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
+                </Fluent:RibbonGroupBox>
 
+                <Fluent:RibbonGroupBox Header="Sweep control"  HorizontalContentAlignment="Center">
 
+                    <Fluent:Button x:Name="xrun_iv_button" Size="Large" Click="run_iv_button" Header="Run I-V sweep" IsEnabled="False">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button x:Name="xstop_iv_button" Size="Large" Click="stop_iv_button" Header="Abort I-V sweep" IsEnabled="False">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="Crimson"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
 
                 </Fluent:RibbonGroupBox>
 
@@ -225,19 +226,24 @@
 
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True">
+                <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
                     
-                    <Fluent:Button Size="Large" Click="connect_Click" Header="Connect">
+                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect" IsEnabled="True">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
-                    <Fluent:Button Size="Large" Click="disconnect_Click" Header="Disconnect">
+                    <!--<Fluent:Button Name="xdisconnect_button" Size="Large" Click="disconnect_Click" Header="Disconnect" IsEnabled="False">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Unlink" Foreground="Crimson"/>
                         </Fluent:Button.LargeIcon>
-                    </Fluent:Button>
+                    </Fluent:Button>-->
+
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox Header="SMU messages" HorizontalAlignment="Center">
+                    <TextBlock x:Name="smu_msg_block" TextWrapping="Wrap" Width="200" HorizontalAlignment="Center" Margin="0,20,0,0"/>
 
                 </Fluent:RibbonGroupBox>
 

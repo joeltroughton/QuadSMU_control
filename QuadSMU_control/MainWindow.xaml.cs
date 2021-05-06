@@ -51,10 +51,12 @@ namespace QuadSMU_control
         bool measurement_in_progress;
         bool listen_for_data = false;
         bool cancel_iv_scan = false;
+        bool stability_active = false;
 
         double stability_interval_secs;
 
         string iv_save_datadir;
+        string stability_save_datadir;
 
         stability_sweep_parameters stability_sweep_params = new stability_sweep_parameters();
 
@@ -76,6 +78,8 @@ namespace QuadSMU_control
             public double jsc;
             public double fill_factor;
             public double pce;
+            public double vmpp;
+
 
             public int smu_channel;
             public int osr;
@@ -227,6 +231,8 @@ namespace QuadSMU_control
                     double maximum_power_point = power_array.Min();
                     int maximum_power_point_index = power_array.ToList().IndexOf(maximum_power_point);
 
+                    this.vmpp = voltage_array[maximum_power_point_index];
+
                     double fill_factor = Math.Abs(maximum_power_point) / (Math.Abs(this.voc) * Math.Abs(this.jsc));
 
 
@@ -244,6 +250,7 @@ namespace QuadSMU_control
             {
                 this.pce = Math.Round(((this.voc * this.jsc * this.fill_factor) / this.irradiance), 3);
             }
+
             public void export_file()
             {
 
@@ -387,20 +394,41 @@ namespace QuadSMU_control
 
         private void connect_serial_port(String com_port)
         {
-            sp.PortName = com_port;
-            sp.BaudRate = 115200;
-            sp.DtrEnable = true;
-            sp.RtsEnable = true;
-            sp.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-            sp.Open();
+            try
+            {
+                sp.PortName = com_port;
+                sp.BaudRate = 115200;
+                sp.DtrEnable = true;
+                sp.RtsEnable = true;
+                sp.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+                sp.Open();
 
-            string send = String.Format("CH1:ENA");
-            sp.WriteLine(send);
+                sp.DiscardInBuffer();
+                sp.DiscardOutBuffer();
 
-            send = String.Format("CH1:OSR 5");
-            sp.WriteLine(send);
+                xconnect_button.IsEnabled = false;
+                stability_tab.IsEnabled = true;
+                iv_tab.IsEnabled = true;
 
 
+            }
+
+            catch (Exception)
+            {
+                smu_msg_block.Text = "Connection failed. Is the correct port selected?";
+                //MessageBox.Show("Connection failed. Is the correct port selected?");
+            }
+        }
+
+        private void disconnect_Click(object sender, RoutedEventArgs e)
+        {
+            sp.DiscardInBuffer();
+            sp.DiscardOutBuffer();
+
+            sp.DataReceived -= null;
+
+            sp.Close();
+            sp.Dispose();
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -589,20 +617,14 @@ namespace QuadSMU_control
             String com_port_id = port_box.Text;
             connect_serial_port(com_port_id);
         }
-        private void disconnect_Click(object sender, RoutedEventArgs e)
-        {
-            //PlotAll();
-            //PrintChecked();
-            //sp.Close();
-            Debug.Print("from params box: {0}", stability_sweep_params.ch1_end_v);
 
-
-        }
 
         private async void run_iv_button(object sender, RoutedEventArgs e)
         {
             if (!measurement_in_progress)
             {
+                xrun_iv_button.IsEnabled = false;
+                xstop_iv_button.IsEnabled = true;
                 cancel_iv_scan = false;
                 renderTimer.Start();
                 int smu_channel = smu_channel_box.SelectedIndex + 1;
@@ -641,7 +663,7 @@ namespace QuadSMU_control
                 jv_export(iv_output_path, single_jv);
                 add_iv_stats_to_csv(iv_save_datadir, single_jv);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(single_jv); });
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(single_jv); xstop_iv_button.IsEnabled = false; xrun_iv_button.IsEnabled = true; });
 
             }
         }
@@ -659,12 +681,14 @@ namespace QuadSMU_control
                 pce = most_recent_iv_curve.pce
             };
 
-            iv_datagrid.Items.Add(data);
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            {
+                iv_datagrid.Items.Add(data);
+                iv_datagrid.SelectedItem = iv_datagrid.Items[iv_datagrid.Items.Count - 1];
+                iv_datagrid.Focus();
+                iv_datagrid.ScrollIntoView(iv_datagrid.SelectedItem);
 
-            // Bring latest entry into focus
-            iv_datagrid.SelectedItem = iv_datagrid.Items[iv_datagrid.Items.Count - 1];
-            iv_datagrid.Focus();
-            iv_datagrid.ScrollIntoView(iv_datagrid.SelectedItem);
+            });
         }
 
         void RenderGraph(object sender, EventArgs e)
@@ -716,19 +740,67 @@ namespace QuadSMU_control
         private void run_stability_button(object sender, RoutedEventArgs e)
         {
             // Start timer
+            if (!stability_active)
+            {
+                run_stability.IsEnabled = false;
+                stop_stability.IsEnabled = true;
 
-            stability_interval_secs = double.Parse(stability_interval_mins.Text) * 60;
-            String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_interval_secs).ToString("HH:mm:ss"));
-            stability_countdown_textbox.Text = next_measurement;
+                stability_interval_secs = double.Parse(stability_interval_mins.Text) * 60;
+                String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_interval_secs).ToString("HH:mm:ss"));
+                stability_countdown_textbox.Text = next_measurement;
+                stability_countdown_textbox.Foreground = Brushes.YellowGreen;
+
+                stability_save_datadir = stability_savedir.Text;
 
 
-            stabilityTimer.Interval = TimeSpan.FromSeconds(stability_interval_secs);
-            stabilityTimer.Tick += stability_timer_Tick;
-            stabilityTimer.Start();
+                stabilityTimer.Interval = TimeSpan.FromSeconds(stability_interval_secs);
+                stabilityTimer.Tick += stability_timer_Tick;
+                stabilityTimer.Start();
+            }
+
 
 
         }
 
+        private void halt_stability_button(object sender, RoutedEventArgs e)
+        {
+            run_stability.IsEnabled = true;
+            stop_stability.IsEnabled = false;
+
+            stabilityTimer.Stop();
+            stability_active = false;
+            stability_countdown_textbox.Foreground = Brushes.Crimson;
+            stability_countdown_textbox.Text = "Not running";
+        }
+
+        private async void instant_stability_button(object sender, RoutedEventArgs e)
+        {
+            if (stabilityTimer.IsEnabled)
+            {
+                stability_countdown_textbox.Foreground = Brushes.YellowGreen;
+                stability_countdown_textbox.Text = "Measurement in progress";
+
+                stabilityTimer.Stop();
+                await run_scheduled_measurements().ConfigureAwait(false);
+                stabilityTimer.Start();
+
+
+            }
+            else
+            {
+                await run_scheduled_measurements().ConfigureAwait(false);
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    stability_countdown_textbox.Foreground = Brushes.Crimson;
+                    stability_countdown_textbox.Text = "Not running";
+                });
+
+
+
+            }
+
+
+        }
 
         void stability_timer_Tick(object sender, EventArgs e)
         {
@@ -741,23 +813,25 @@ namespace QuadSMU_control
 
         }
 
-        private async void run_scheduled_measurements()
+        private async Task run_scheduled_measurements()
         {
             bool ch1_enabled = (bool)smu_ch_1_box.IsChecked;
             bool ch2_enabled = (bool)smu_ch_2_box.IsChecked;
             bool ch3_enabled = (bool)smu_ch_3_box.IsChecked;
             bool ch4_enabled = (bool)smu_ch_4_box.IsChecked;
 
+
             //stabilityTimer.Stop();
             renderTimer.Start();
 
-
+            string ch1_save_dir = stability_save_datadir;
 
             if (ch1_enabled)
             {
+
                 iv_curve ch1_jv = new iv_curve();
                 ch1_jv = generate_measurement_profile(
-                    "device name",
+                    "CH1 device",
                     1,
                     stability_sweep_params.ch1_start_v,
                     stability_sweep_params.ch1_end_v,
@@ -768,19 +842,20 @@ namespace QuadSMU_control
                     stability_sweep_params.ch1_area_cm2,
                     stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch1_polarity,
-                    stability_sweep_params.ch1_hold_state); ;
+                    stability_sweep_params.ch1_hold_state);
 
                 await call_measurement(ch1_jv).ConfigureAwait(false);
+                updateDatagrid(ch1_jv);
                 set_hold_voltage(ch1_jv);
-                add_stability_stats_to_csv("C:\\data\\quad\\stats.csv", ch1_jv);
-                jv_export("C:\\data\\quad\\test.csv", ch1_jv);
+                add_stability_stats_to_csv(stability_save_datadir, ch1_jv);
+                stability_jv_export(stability_save_datadir, ch1_jv);
             }
 
             if (ch2_enabled)
             {
                 iv_curve ch2_jv = new iv_curve();
                 ch2_jv = generate_measurement_profile(
-                    "device name",
+                    "CH2 device",
                     1,
                     stability_sweep_params.ch2_start_v,
                     stability_sweep_params.ch2_end_v,
@@ -793,17 +868,18 @@ namespace QuadSMU_control
                     stability_sweep_params.ch2_polarity,
                     stability_sweep_params.ch2_hold_state);
 
-                call_measurement(ch2_jv);
+                await call_measurement(ch2_jv).ConfigureAwait(false);
+                updateDatagrid(ch2_jv);
                 set_hold_voltage(ch2_jv);
-                add_stability_stats_to_csv("", ch2_jv);
-                jv_export("", ch2_jv);
+                add_stability_stats_to_csv(stability_save_datadir, ch2_jv);
+                stability_jv_export(stability_save_datadir, ch2_jv);
             }
 
             if (ch3_enabled)
             {
                 iv_curve ch3_jv = new iv_curve();
                 ch3_jv = generate_measurement_profile(
-                    "device name",
+                    "CH3 device",
                     1,
                     stability_sweep_params.ch3_start_v,
                     stability_sweep_params.ch3_end_v,
@@ -816,17 +892,18 @@ namespace QuadSMU_control
                     stability_sweep_params.ch3_polarity,
                     stability_sweep_params.ch3_hold_state);
 
-                call_measurement(ch3_jv);
+                await call_measurement(ch3_jv).ConfigureAwait(false);
+                updateDatagrid(ch3_jv);
                 set_hold_voltage(ch3_jv);
-                add_stability_stats_to_csv("", ch3_jv);
-                jv_export("", ch3_jv);
+                add_stability_stats_to_csv(stability_save_datadir, ch3_jv);
+                stability_jv_export(stability_save_datadir, ch3_jv);
             }
 
             if (ch4_enabled)
             {
                 iv_curve ch4_jv = new iv_curve();
                 ch4_jv = generate_measurement_profile(
-                    "device name",
+                    "CH4 device",
                     1,
                     stability_sweep_params.ch4_start_v,
                     stability_sweep_params.ch4_end_v,
@@ -839,19 +916,46 @@ namespace QuadSMU_control
                     stability_sweep_params.ch4_polarity,
                     stability_sweep_params.ch4_hold_state);
 
-                call_measurement(ch4_jv);
+                await call_measurement(ch4_jv).ConfigureAwait(false);
+                updateDatagrid(ch4_jv);
                 set_hold_voltage(ch4_jv);
-                add_stability_stats_to_csv("", ch4_jv);
-                jv_export("", ch4_jv);
+                add_stability_stats_to_csv(stability_save_datadir, ch4_jv);
+                stability_jv_export(stability_save_datadir, ch4_jv);
             }
 
             renderTimer.Stop();
-
+            return;
         }
 
         void set_hold_voltage(iv_curve ivcurve)
         {
             // Apply the hold voltage to the SMU channel in question
+            int smu_channel = ivcurve.smu_channel;
+            int hold_condition = ivcurve.hold_state;
+            string send;
+            // 0 = VOC, 1 = JSC, 2 = MPP
+            switch (hold_condition)
+            {
+                case 0:
+                    send = String.Format("CH{0}:VOL {1}", smu_channel, ivcurve.voc);
+                    sp.Write(send);
+                    Debug.Print("Holding CH{0} at VOC: {1}", smu_channel, ivcurve.voc);
+                    break;
+                case 1:
+                    send = String.Format("CH{0}:VOL 0", smu_channel);
+                    sp.Write(send);
+                    Debug.Print("Holding CH{0} at JSC (0V)", smu_channel);
+
+                    break;
+
+                case 2:
+                    send = String.Format("CH{0}:VOL {1}", smu_channel, ivcurve.vmpp);
+                    sp.Write(send);
+                    Debug.Print("Holding CH{0} at Vmpp: {1}", smu_channel, ivcurve.vmpp);
+
+                    break;
+
+            }
         }
 
         private void stability_params_button(object sender, RoutedEventArgs e)
@@ -860,11 +964,6 @@ namespace QuadSMU_control
 
             stability_param_dialog.Show();
         }
-
-        public void collect_params()
-        {
-        }
-
 
         public iv_curve generate_measurement_profile(
             string device_name,
@@ -894,6 +993,7 @@ namespace QuadSMU_control
             iv_profile.active_area = active_area;
             iv_profile.irradiance = dirradience;
             iv_profile.polarity = Convert.ToBoolean(polarity);
+            iv_profile.hold_state = hold_state;
 
             return iv_profile;
         }
@@ -907,8 +1007,8 @@ namespace QuadSMU_control
             double[] voltage_array = ivcurve.voltage.ToArray();
             double[] current_array = ivcurve.current.ToArray();
 
-            String header1 = String.Format("Device ID, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Timestamp");
-            String header2 = String.Format("{0}, {1}, {2}, {3}, {4}, {5}", ivcurve.device_name, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce, ivcurve.start_timestamp);
+            String header1 = String.Format("Device ID, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Vmpp (V) Timestamp");
+            String header2 = String.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}", ivcurve.device_name, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce, ivcurve.vmpp, ivcurve.start_timestamp);
 
             csv.AppendLine(header1);
             csv.AppendLine(header2);
@@ -934,19 +1034,57 @@ namespace QuadSMU_control
             Debug.Print("jv_export took {0}ms", watch.ElapsedMilliseconds);
         }
 
+        private void stability_jv_export(string datadir, iv_curve ivcurve)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            var csv = new StringBuilder();
+
+
+            datadir = String.Format("{0}\\JV\\CH{1}", datadir, ivcurve.smu_channel, ivcurve.start_timestamp);
+            DirectoryInfo di = Directory.CreateDirectory(datadir);
+
+            datadir = String.Format("{0}\\CH{1}_{2}.dat", datadir, ivcurve.smu_channel, ivcurve.start_timestamp);
+
+
+            double[] voltage_array = ivcurve.voltage.ToArray();
+            double[] current_array = ivcurve.current.ToArray();
+
+            String header1 = String.Format("Device ID, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Vmpp (V), Timestamp");
+            String header2 = String.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}", ivcurve.device_name, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce, ivcurve.vmpp, ivcurve.start_timestamp);
+
+            csv.AppendLine(header1);
+            csv.AppendLine(header2);
+
+            for (int i = 0; i < voltage_array.Length; i++)
+            {
+                var voltage = voltage_array[i].ToString();
+                var current = current_array[i].ToString();
+                var newLine = string.Format("{0},{1}", voltage, current);
+                csv.AppendLine(newLine);
+            }
+
+            File.WriteAllText(datadir, csv.ToString());
+
+            watch.Stop();
+            Debug.Print("stability_jv_export took {0}ms", watch.ElapsedMilliseconds);
+        }
+
         private void add_stability_stats_to_csv(string datadir, iv_curve ivcurve)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             var csv = new StringBuilder();
 
+            datadir = String.Format("{0}\\CH{1}_stability.txt", datadir, ivcurve.smu_channel);
+
             if (!File.Exists(datadir))
             {
-                String header = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%)");
+                String header = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), Vmpp (V), PCE (%)");
                 csv.AppendLine(header);
             }
 
-            String stats = String.Format("{0}, {1}, {2}, {3}, {4}", ivcurve.start_timestamp, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce);
+            String stats = String.Format("{0}, {1}, {2}, {3}, {4}, {5}", ivcurve.start_timestamp, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce, ivcurve.vmpp);
 
             csv.AppendLine(stats);
 
@@ -967,11 +1105,11 @@ namespace QuadSMU_control
 
             if (!File.Exists(datadir))
             {
-                String header = String.Format("Cell ID, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%)");
+                String header = String.Format("Cell ID, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Vmpp (V)");
                 csv.AppendLine(header);
             }
 
-            String stats = String.Format("{0}, {1}, {2}, {3}, {4}", ivcurve.device_name, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce);
+            String stats = String.Format("{0}, {1}, {2}, {3}, {4}, {5}", ivcurve.device_name, ivcurve.voc, ivcurve.jsc, ivcurve.fill_factor, ivcurve.pce, ivcurve.vmpp);
 
             csv.AppendLine(stats);
 
@@ -985,9 +1123,14 @@ namespace QuadSMU_control
         private void stability_savedir_button(object sender, RoutedEventArgs e)
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-
-            stability_savedir.Text = dialog.SelectedPath;
+            if (dialog.ShowDialog() == WinForms.DialogResult.OK)
+            {
+                stability_savedir.Text = dialog.SelectedPath;
+            }
+            else
+            {
+                return;
+            }
         }
 
         private void stop_iv_button(object sender, RoutedEventArgs e)
@@ -1014,6 +1157,9 @@ namespace QuadSMU_control
             iv_save_datadir = dialog.SelectedPath;
 
             Debug.Print("Data directory: {0}", iv_save_datadir);
+
+            xrun_iv_button.IsEnabled = true;
+
         }
 
     }
