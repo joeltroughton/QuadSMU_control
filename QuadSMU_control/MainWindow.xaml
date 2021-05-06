@@ -31,13 +31,114 @@
 
             <!--Tabs-->
 
+            <Fluent:RibbonTabItem x:Name="iv_tab" Header="I-V sweep" IsEnabled="True">
+
+                <Fluent:RibbonGroupBox Header="SMU channel">
+
+
+                    <Fluent:ComboBox Size="Large" x:Name="smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0">
+
+
+                    </Fluent:ComboBox>
+
+
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox Header="I-V sweep setup">
+                    <Grid Margin="0,5,0,0">
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="60"/>
+                        </Grid.ColumnDefinitions>
+
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Start voltage (V)"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="End voltage (V)"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Voltage step (mV)"/>
+                        <Fluent:Spinner x:Name="start_voltage" Grid.Row="0" Grid.Column="1" Format="F3" Width="70" Increment="0.02" Value="1.20" Minimum="-5" Maximum="5"/>
+                        <Fluent:Spinner x:Name="end_voltage" Grid.Row="1" Grid.Column="1" Format="F3" Width="70" Increment="0.02" Value="-0.2" Minimum="-5" Maximum="5"/>
+                        <Fluent:Spinner x:Name="step_size_mv" Grid.Row="2" Grid.Column="1" Format="F1" Width="70" Increment="20" Value="20" Minimum="0.1"/>
+                        <!--<Fluent:TextBox Grid.Row="0" Grid.Column="1" x:Name="start_voltage" Width="50" TextChanged="start_voltage_TextChanged" Text="1.2"/>-->
+                        <!--<Fluent:TextBox Grid.Row="1" Grid.Column="1" x:Name="end_voltage" Width="50" Text="-0.2"/>-->
+                        <!--<Fluent:TextBox Grid.Row="2" Grid.Column="1" x:Name="step_size_mv" Width="50" Cursor="" Text="50"/>-->
+
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Delay (ms)" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="OSR" Margin="5,0,0,0" ToolTip="The number of oversamples measured for each point"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="I limit (mA)" Margin="5,0,0,0" ToolTip="The current limit in mA"/>
+                        <Fluent:Spinner x:Name="delay_time_ms" Grid.Row="0" Grid.Column="3" Format="0" Width="60" Increment="50" Value="50" Minimum="0" Maximum="5"/>
+                        <Fluent:Spinner x:Name="osr" Grid.Row="1" Grid.Column="3" Format="0" Width="60" Increment="1" Value="5" Minimum="1" Maximum="50"/>
+                        <Fluent:Spinner x:Name="i_limit" Grid.Row="2" Grid.Column="3" Format="F1" Width="60" Increment="0.5" Value="40" Minimum="2" Maximum="40"/>
+
+                        <!--<Fluent:TextBox Grid.Row="0" Grid.Column="3" x:Name="delay_time_ms" Width="50" Text="0"/>
+                        <Fluent:TextBox Grid.Row="1" Grid.Column="3" x:Name="osr" Width="50" Text="5"/>
+                        <Fluent:TextBox Grid.Row="2" Grid.Column="3" x:Name="i_limit" Width="50" Text="40"/>-->
+
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Irradiance (suns)" Margin="5,0,0,0" Width="150"  ToolTip="The time between each measurement point"/>
+                        <TextBlock Grid.Row="1" Grid.Column="4" Text="Active area (cm²)" Margin="5,0,0,0" Width="150" ToolTip="The number of oversamples measured for each point"/>
+                        <TextBlock Grid.Row="2" Grid.Column="4" Text="Cell ID" Margin="5,3,0,0" Width="150" ToolTip="The number of oversamples measured for each point"/>
+
+                        <Fluent:Spinner x:Name="irradience" Grid.Row="0" Grid.Column="5" Format="F2" Width="60" Increment="0.01" Value="1.00" Minimum="0.01"/>
+                        <Fluent:Spinner x:Name="active_area_textbox" Grid.Row="1" Grid.Column="5" Format="F2" Width="60" Increment="0.01" Value="0.1" Minimum="0.01"/>
+
+                        <!--<Fluent:TextBox Grid.Row="0" Grid.Column="5" x:Name="irradience" Width="50" Text="1.00"/>
+                        <Fluent:TextBox Grid.Row="1" Grid.Column="5" x:Name="active_area_textbox" Width="50" Text="1.0"/>-->
+
+                        <Fluent:TextBox Grid.Row="2" Grid.Column="5" x:Name="cell_name" Margin="-60,0,0,0" Text="test_01"/>
+
+                    </Grid>
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox Header="Save"  HorizontalContentAlignment="Center">
+
+                    <Fluent:Button Grid.Row="1" Size="Large" Click="save_iv_datadir_button" Header="Select save directory">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button Size="Large" Click="open_iv_datadir_button" Header="Open save directory">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_FolderOpen" Foreground="CornflowerBlue"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox Header="Sweep control"  HorizontalContentAlignment="Center">
+
+                    <Fluent:Button x:Name="xrun_iv_button" Size="Large" Click="run_iv_button" Header="Run I-V sweep" IsEnabled="False">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button x:Name="xstop_iv_button" Size="Large" Click="stop_iv_button" Header="Abort I-V sweep" IsEnabled="False">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="Crimson"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                </Fluent:RibbonGroupBox>
+
+            </Fluent:RibbonTabItem>
+
             <Fluent:RibbonTabItem x:Name="stability_tab" Header="Stability" IsEnabled="True">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
                     <Fluent:CheckBox  Header="Ch 1" x:Name="smu_ch_1_box" />
                     <Fluent:CheckBox  Header="Ch 2" x:Name="smu_ch_2_box"/>
                     <Fluent:CheckBox  Header="Ch 3" x:Name="smu_ch_3_box"/>
-                    <Fluent:CheckBox  Header="Ch 4" x:Name="smu_ch_4_box"/>                  
+                    <Fluent:CheckBox  Header="Ch 4" x:Name="smu_ch_4_box"/>
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="J-V scan">
@@ -127,93 +228,55 @@
 
             </Fluent:RibbonTabItem>
 
-            <Fluent:RibbonTabItem x:Name="iv_tab" Header="I-V sweep" IsEnabled="False">
 
+
+            <Fluent:RibbonTabItem Header="Manual control" MouseLeftButtonUp="manual_tab_selected" IsEnabled="False">
                 <Fluent:RibbonGroupBox Header="SMU channel">
-
-
-                        <Fluent:ComboBox Size="Large" x:Name="smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0">
-
-                            
-                        </Fluent:ComboBox>
-
-
+                    <Fluent:ComboBox Size="Large" x:Name="spo_smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0">
+                    </Fluent:ComboBox>
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="I-V sweep setup">
-                    <Grid Margin="0,5,0,0">
-
+                <Fluent:RibbonGroupBox Header="Settings" Width="220" HorizontalContentAlignment="Center">
+                    <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="95"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="70"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="95"/>
-                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Set voltage (V)" Width="100"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Current limit (mA)" Width="100"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Oversample rate" Width="100"/>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Start voltage (V)"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="End voltage (V)"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Voltage step (mV)"/>
-                        <Fluent:TextBox Grid.Row="0" Grid.Column="1" x:Name="start_voltage" Width="50" TextChanged="start_voltage_TextChanged" Text="1.2"/>
-                        <Fluent:TextBox Grid.Row="1" Grid.Column="1" x:Name="end_voltage" Width="50" Text="-0.2"/>
-                        <Fluent:TextBox Grid.Row="2" Grid.Column="1" x:Name="step_size_mv" Width="50" Cursor="" Text="50"/>
-
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Delay (ms)" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
-                        <TextBlock Grid.Row="1" Grid.Column="2" Text="OSR" Margin="5,0,0,0" ToolTip="The number of oversamples measured for each point"/>
-                        <TextBlock Grid.Row="2" Grid.Column="2" Text="I limit" Margin="5,0,0,0" ToolTip="The current limit in mA"/>
-                        <Fluent:TextBox Grid.Row="0" Grid.Column="3" x:Name="delay_time_ms" Width="50" Text="0"/>
-                        <Fluent:TextBox Grid.Row="1" Grid.Column="3" x:Name="osr" Width="50" Text="5"/>
-                        <Fluent:TextBox Grid.Row="2" Grid.Column="3" x:Name="i_limit" Width="50" Text="40"/>
-
-                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Irradiance (suns)" Margin="5,0,0,0" Width="150"  ToolTip="The time between each measurement point"/>
-                        <TextBlock Grid.Row="1" Grid.Column="4" Text="Active area (cm²)" Margin="5,0,0,0" Width="150" ToolTip="The number of oversamples measured for each point"/>
-                        <TextBlock Grid.Row="2" Grid.Column="4" Text="Cell ID" Margin="5,0,0,0" Width="150" ToolTip="The number of oversamples measured for each point"/>
-
-                        <Fluent:TextBox Grid.Row="0" Grid.Column="5" x:Name="irradience" Width="50" Text="1.00"/>
-                        <Fluent:TextBox Grid.Row="1" Grid.Column="5" x:Name="active_area_textbox" Width="50" Text="1.0"/>
-
-                        <Fluent:TextBox Grid.Row="2" Grid.Column="5" x:Name="cell_name" Margin="-60,0,0,0" Text="test_01"/>
+                        <Fluent:Spinner Grid.Row="0" Grid.Column="1" Width="70" Format="F3" Minimum="-5.00" Maximum="5.00" Increment="0.02"/>
+                        <Fluent:Spinner Grid.Row="1" Grid.Column="1" Width="70" Format="F1" Minimum="1.5" Maximum="40" Increment="0.5" Value="40"/>
+                        <Fluent:Spinner Grid.Row="2" Grid.Column="1" Width="70" Format="" Minimum="1" Maximum="0" Value="5"/>
 
                     </Grid>
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="Save"  HorizontalContentAlignment="Center">
-
-                    <Fluent:Button Grid.Row="1" Size="Large" Click="save_iv_datadir_button" Header="Select save directory">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>
-
-                    <Fluent:Button Size="Large" Click="open_iv_datadir_button" Header="Open save directory">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_FolderOpen" Foreground="CornflowerBlue"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>
-                </Fluent:RibbonGroupBox>
-
-                <Fluent:RibbonGroupBox Header="Sweep control"  HorizontalContentAlignment="Center">
-
-                    <Fluent:Button x:Name="xrun_iv_button" Size="Large" Click="run_iv_button" Header="Run I-V sweep" IsEnabled="False">
+                <Fluent:RibbonGroupBox Header="Control" HorizontalContentAlignment="Center" >
+                    <Fluent:Button x:Name="start_manual" Size="Large" Click="run_iv_button" Header="Run" Width="40" IsEnabled="True">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
-                    <Fluent:Button x:Name="xstop_iv_button" Size="Large" Click="stop_iv_button" Header="Abort I-V sweep" IsEnabled="False">
+                    <Fluent:Button x:Name="stop_manual" Size="Large" Click="run_iv_button" Header="Stop" Width="40" IsEnabled="True" Margin="5,0,5,0">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="Crimson"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
+                    <Fluent:Button x:Name="export_manual" Size="Large" Click="run_iv_button" Header="Export data" Width="40" IsEnabled="True" Margin="5,0,5,0">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
                 </Fluent:RibbonGroupBox>
 
             </Fluent:RibbonTabItem>
@@ -226,8 +289,11 @@
 
                 </Fluent:RibbonGroupBox>
 
+
+
+
                 <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
-                    
+
                     <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect" IsEnabled="True">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>

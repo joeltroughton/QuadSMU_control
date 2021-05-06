@@ -338,6 +338,7 @@ namespace QuadSMU_control
             this.InitializeComponent();
             port_box.ItemsSource = ports;
             smu_channel_box.ItemsSource = smu_channels;
+            spo_smu_channel_box.ItemsSource = smu_channels;
 
             jvPlot.plt.YLabel("Current density (mA/cm²)");
             jvPlot.plt.XLabel("Voltage (V)");
@@ -1162,6 +1163,12 @@ namespace QuadSMU_control
 
         }
 
+        private void manual_tab_selected(object sender, MouseButtonEventArgs e)
+        {
+            PlottableScatter manual_plot;
+            
+
+        }
     }
 }
 
