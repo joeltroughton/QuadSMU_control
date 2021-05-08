@@ -241,7 +241,15 @@ namespace QuadSMU_control
                     Debug.Print("Power array max = {0} at index {1}", maximum_power_point, maximum_power_point_index);
                     Debug.Print("VOC: {0} \t JSC: {1}", this.voc, this.jsc);
 
-                    this.fill_factor = Math.Round(fill_factor, 3);
+                    if (fill_factor > 1)
+                    {
+                        this.fill_factor = 0;
+                    }
+                    else
+                    {
+                        this.fill_factor = Math.Round(fill_factor, 3);
+                    }
+
                 }
                 catch
                 {
@@ -1085,7 +1093,7 @@ namespace QuadSMU_control
 
             if (!File.Exists(datadir))
             {
-               String header = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Vmpp (V)");
+                String header = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Vmpp (V)");
                 csv.AppendLine(header);
             }
 
