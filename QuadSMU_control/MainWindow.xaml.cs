@@ -54,6 +54,7 @@ namespace QuadSMU_control
         bool stability_active = false;
 
         double stability_interval_secs;
+        double stability_currentcell_active_area;
 
         string iv_save_datadir;
         string stability_save_datadir;
@@ -794,8 +795,6 @@ namespace QuadSMU_control
 
                 stabilityTimer.Stop();
                 await run_scheduled_measurements().ConfigureAwait(false);
-                stabilityTimer.Start();
-
 
             }
             else
@@ -856,6 +855,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch1_polarity,
                     stability_sweep_params.ch1_hold_state);
 
+                stability_currentcell_active_area = ch1_jv.active_area;
                 await call_measurement(ch1_jv).ConfigureAwait(false);
                 updateDatagrid(ch1_jv);
                 set_hold_voltage(ch1_jv);
@@ -880,6 +880,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch2_polarity,
                     stability_sweep_params.ch2_hold_state);
 
+                stability_currentcell_active_area = ch2_jv.active_area;
                 await call_measurement(ch2_jv).ConfigureAwait(false);
                 updateDatagrid(ch2_jv);
                 set_hold_voltage(ch2_jv);
@@ -904,6 +905,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch3_polarity,
                     stability_sweep_params.ch3_hold_state);
 
+                stability_currentcell_active_area = ch3_jv.active_area;
                 await call_measurement(ch3_jv).ConfigureAwait(false);
                 updateDatagrid(ch3_jv);
                 set_hold_voltage(ch3_jv);
@@ -927,7 +929,8 @@ namespace QuadSMU_control
                     stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch4_polarity,
                     stability_sweep_params.ch4_hold_state);
-
+                
+                stability_currentcell_active_area = ch4_jv.active_area;
                 await call_measurement(ch4_jv).ConfigureAwait(false);
                 updateDatagrid(ch4_jv);
                 set_hold_voltage(ch4_jv);
