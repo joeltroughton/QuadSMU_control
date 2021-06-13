@@ -631,7 +631,7 @@ namespace QuadSMU_control
                 int smu_channel = smu_channel_box.SelectedIndex + 1;
                 double start_v = double.Parse(start_voltage.Text);
                 double end_v = double.Parse(end_voltage.Text);
-                int step_size = int.Parse(step_size_mv.Text);
+                double step_size = double.Parse(step_size_mv.Text);
                 double i_limit_ma = double.Parse(i_limit.Text);
                 int delay_time = int.Parse(delay_time_ms.Text);
                 double dirradience = double.Parse(irradience.Text);
