@@ -68,7 +68,7 @@
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Voltage step (mV)"/>
                         <Fluent:Spinner x:Name="start_voltage" Grid.Row="0" Grid.Column="1" Format="F3" Width="70" Increment="0.02" Value="1.20" Minimum="-5" Maximum="5"/>
                         <Fluent:Spinner x:Name="end_voltage" Grid.Row="1" Grid.Column="1" Format="F3" Width="70" Increment="0.02" Value="-0.2" Minimum="-5" Maximum="5"/>
-                        <Fluent:Spinner x:Name="step_size_mv" Grid.Row="2" Grid.Column="1" Format="F1" Width="70" Increment="20" Value="20" Minimum="0.1"/>
+                        <Fluent:Spinner x:Name="step_size_mv" Grid.Row="2" Grid.Column="1" Format="0" Width="70" Increment="20" Value="20" Minimum="0.1"/>
                         <!--<Fluent:TextBox Grid.Row="0" Grid.Column="1" x:Name="start_voltage" Width="50" TextChanged="start_voltage_TextChanged" Text="1.2"/>-->
                         <!--<Fluent:TextBox Grid.Row="1" Grid.Column="1" x:Name="end_voltage" Width="50" Text="-0.2"/>-->
                         <!--<Fluent:TextBox Grid.Row="2" Grid.Column="1" x:Name="step_size_mv" Width="50" Cursor="" Text="50"/>-->

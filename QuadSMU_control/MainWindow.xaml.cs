@@ -54,6 +54,7 @@ namespace QuadSMU_control
         bool stability_active = false;
 
         double stability_interval_secs;
+        double stability_currentcell_active_area;
 
         string iv_save_datadir;
         string stability_save_datadir;
@@ -228,7 +229,9 @@ namespace QuadSMU_control
 
                 try
                 {
-                    double maximum_power_point = power_array.Min();
+                    // WARNING - Min for PGA281, Max for OLD LT1991
+                    double maximum_power_point = power_array.Max();
+                    //double maximum_power_point = power_array.Min();
                     int maximum_power_point_index = power_array.ToList().IndexOf(maximum_power_point);
 
                     this.vmpp = voltage_array[maximum_power_point_index];
@@ -239,7 +242,15 @@ namespace QuadSMU_control
                     Debug.Print("Power array max = {0} at index {1}", maximum_power_point, maximum_power_point_index);
                     Debug.Print("VOC: {0} \t JSC: {1}", this.voc, this.jsc);
 
-                    this.fill_factor = Math.Round(fill_factor, 3);
+                    if (fill_factor > 1)
+                    {
+                        this.fill_factor = 0;
+                    }
+                    else
+                    {
+                        this.fill_factor = Math.Round(fill_factor, 3);
+                    }
+
                 }
                 catch
                 {
@@ -535,7 +546,8 @@ namespace QuadSMU_control
 
             send = String.Format("CH{0}:MEA:VOL {1}", new_curve.smu_channel, new_curve.start_v);
             sp.WriteLine(send);
-            await Task.Delay(50);
+            //await Task.Delay(50);
+            await Task.Delay(500); // QuadSMU slow
 
             send = String.Format("CH{0}:OSR {1}", new_curve.smu_channel, new_curve.osr);
             sp.WriteLine(send);
@@ -783,8 +795,6 @@ namespace QuadSMU_control
 
                 stabilityTimer.Stop();
                 await run_scheduled_measurements().ConfigureAwait(false);
-                stabilityTimer.Start();
-
 
             }
             else
@@ -845,6 +855,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch1_polarity,
                     stability_sweep_params.ch1_hold_state);
 
+                stability_currentcell_active_area = ch1_jv.active_area;
                 await call_measurement(ch1_jv).ConfigureAwait(false);
                 updateDatagrid(ch1_jv);
                 set_hold_voltage(ch1_jv);
@@ -857,7 +868,7 @@ namespace QuadSMU_control
                 iv_curve ch2_jv = new iv_curve();
                 ch2_jv = generate_measurement_profile(
                     "CH2 device",
-                    1,
+                    2,
                     stability_sweep_params.ch2_start_v,
                     stability_sweep_params.ch2_end_v,
                     stability_sweep_params.ch2_step_mv,
@@ -869,6 +880,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch2_polarity,
                     stability_sweep_params.ch2_hold_state);
 
+                stability_currentcell_active_area = ch2_jv.active_area;
                 await call_measurement(ch2_jv).ConfigureAwait(false);
                 updateDatagrid(ch2_jv);
                 set_hold_voltage(ch2_jv);
@@ -881,7 +893,7 @@ namespace QuadSMU_control
                 iv_curve ch3_jv = new iv_curve();
                 ch3_jv = generate_measurement_profile(
                     "CH3 device",
-                    1,
+                    3,
                     stability_sweep_params.ch3_start_v,
                     stability_sweep_params.ch3_end_v,
                     stability_sweep_params.ch3_step_mv,
@@ -893,6 +905,7 @@ namespace QuadSMU_control
                     stability_sweep_params.ch3_polarity,
                     stability_sweep_params.ch3_hold_state);
 
+                stability_currentcell_active_area = ch3_jv.active_area;
                 await call_measurement(ch3_jv).ConfigureAwait(false);
                 updateDatagrid(ch3_jv);
                 set_hold_voltage(ch3_jv);
@@ -905,7 +918,7 @@ namespace QuadSMU_control
                 iv_curve ch4_jv = new iv_curve();
                 ch4_jv = generate_measurement_profile(
                     "CH4 device",
-                    1,
+                    4,
                     stability_sweep_params.ch4_start_v,
                     stability_sweep_params.ch4_end_v,
                     stability_sweep_params.ch4_step_mv,
@@ -916,7 +929,8 @@ namespace QuadSMU_control
                     stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch4_polarity,
                     stability_sweep_params.ch4_hold_state);
-
+                
+                stability_currentcell_active_area = ch4_jv.active_area;
                 await call_measurement(ch4_jv).ConfigureAwait(false);
                 updateDatagrid(ch4_jv);
                 set_hold_voltage(ch4_jv);
@@ -953,6 +967,7 @@ namespace QuadSMU_control
                     send = String.Format("CH{0}:VOL {1}", smu_channel, ivcurve.vmpp);
                     sp.Write(send);
                     Debug.Print("Holding CH{0} at Vmpp: {1}", smu_channel, ivcurve.vmpp);
+                    Debug.Print("{0}", send);
 
                     break;
 
@@ -1077,11 +1092,11 @@ namespace QuadSMU_control
 
             var csv = new StringBuilder();
 
-            datadir = String.Format("{0}\\CH{1}_stability.txt", datadir, ivcurve.smu_channel);
+            datadir = String.Format("{0}\\CH{1}_stability.csv", datadir, ivcurve.smu_channel);
 
             if (!File.Exists(datadir))
             {
-                String header = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), Vmpp (V), PCE (%)");
+                String header = String.Format("Timestamp, VOC (V), JSC (mAcm-2), Fill factor (%), PCE (%), Vmpp (V)");
                 csv.AppendLine(header);
             }
 
@@ -1166,7 +1181,7 @@ namespace QuadSMU_control
         private void manual_tab_selected(object sender, MouseButtonEventArgs e)
         {
             PlottableScatter manual_plot;
-            
+
 
         }
     }
