@@ -31,6 +31,43 @@
 
             <!--Tabs-->
 
+            <Fluent:RibbonTabItem Header="Setup">
+
+                <Fluent:RibbonGroupBox Header="Port select" Width="100" Grid.IsSharedSizeScope="True">
+
+                    <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1" Margin="0,25,0,0"/>
+
+                </Fluent:RibbonGroupBox>
+
+
+                <Fluent:RibbonGroupBox Header="Channels" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
+                    <Fluent:ComboBox x:Name="smu_channels_box" Text="SMU channels" SelectionChanged="smu_channels_box_SelectionChanged" SelectedIndex="0" Margin="0,25,0,0"/>
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
+
+                    
+                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect" IsEnabled="True">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <!--<Fluent:Button Name="xdisconnect_button" Size="Large" Click="disconnect_Click" Header="Disconnect" IsEnabled="False">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Unlink" Foreground="Crimson"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>-->
+
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox Header="SMU messages" HorizontalAlignment="Center">
+                    <TextBlock x:Name="smu_msg_block" TextWrapping="Wrap" Width="200" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+
+                </Fluent:RibbonGroupBox>
+
+            </Fluent:RibbonTabItem>
+
             <Fluent:RibbonTabItem x:Name="iv_tab" Header="I-V sweep" IsEnabled="True">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
@@ -281,39 +318,7 @@
 
             </Fluent:RibbonTabItem>
 
-            <Fluent:RibbonTabItem Header="Setup">
-
-                <Fluent:RibbonGroupBox Header="Port select" Width="100" Grid.IsSharedSizeScope="True">
-
-                    <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1" Margin="0,25,0,0"/>
-
-                </Fluent:RibbonGroupBox>
-
-
-
-
-                <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
-
-                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect" IsEnabled="True">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>
-
-                    <!--<Fluent:Button Name="xdisconnect_button" Size="Large" Click="disconnect_Click" Header="Disconnect" IsEnabled="False">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_Unlink" Foreground="Crimson"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>-->
-
-                </Fluent:RibbonGroupBox>
-
-                <Fluent:RibbonGroupBox Header="SMU messages" HorizontalAlignment="Center">
-                    <TextBlock x:Name="smu_msg_block" TextWrapping="Wrap" Width="200" HorizontalAlignment="Center" Margin="0,20,0,0"/>
-
-                </Fluent:RibbonGroupBox>
-
-            </Fluent:RibbonTabItem>
+            
 
 
         </Fluent:Ribbon>

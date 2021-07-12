@@ -35,6 +35,9 @@ namespace QuadSMU_control
         public string[] ports = SerialPort.GetPortNames();
         public String[] smu_channels = { "Channel 1", "Channel 2", "Channel 3", "Channel 4" };
 
+        public int[] smu_stacks = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        public int num_smu_stacks = 1;
+
         List<double> temp_voltage_list = new List<double>();
         List<double> temp_current_list = new List<double>();
 
@@ -60,7 +63,6 @@ namespace QuadSMU_control
         string stability_save_datadir;
 
         stability_sweep_parameters stability_sweep_params = new stability_sweep_parameters();
-
         DispatcherTimer stabilityTimer = new DispatcherTimer();
 
         public class iv_curve
@@ -84,9 +86,10 @@ namespace QuadSMU_control
 
             public int smu_channel;
             public int osr;
-            public int hold_state; // 0 = VOC, 1 = JSC, 2 = MPP
+            public int hold_state; // 0 = VOC, 1 = JSC, 2 = MPP 3 = Arb (see arb_hold_v)
             public int step_delay; // Milliseconds
             public double v_step_size; // Millivolts
+            public double arb_hold_v; // Arbitrary hold voltage
             public bool polarity;
             public bool sweep_direction;
             public double active_area;
@@ -344,11 +347,61 @@ namespace QuadSMU_control
 
         }
 
+        public class stability_measurement
+        {
+            // Contains up to 16 stacks
+            // Stacks contain 4 channels
+            // Channels contain individual settings
+
+            public stack_settings[] stack = new stack_settings[8];
+
+            public void create_stacks()
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    stack[i] = new stack_settings();
+                }
+            }
+
+        }
+
+        public class stack_settings
+        {
+            public stability_channel_settings[] channel = new stability_channel_settings[4];
+
+            public void create_channels()
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    channel[i] = new stability_channel_settings();
+                }
+            }
+
+        }
+
+        public class stability_channel_settings
+        {
+            public double start_v;
+            public double end_v;
+            public double step_mv;
+            public int delay_ms;
+            public double ilim_ma;
+            public int osr;
+            public double area_cm2;
+            public int polarity;
+            public int hold_state;
+            public double arb_hold_v;
+            public String name;
+            public double irradience;
+
+        }
+
         public MainWindow()
         {
             this.InitializeComponent();
             port_box.ItemsSource = ports;
             smu_channel_box.ItemsSource = smu_channels;
+            smu_channels_box.ItemsSource = smu_stacks;
             spo_smu_channel_box.ItemsSource = smu_channels;
 
             jvPlot.plt.YLabel("Current density (mA/cm²)");
@@ -358,7 +411,19 @@ namespace QuadSMU_control
             renderTimer.Interval = TimeSpan.FromMilliseconds(67);
             renderTimer.Tick += RenderGraph;
             //connect_serial_port();
+            stability_measurement stability_params = new stability_measurement();
 
+            stability_measurement stability_inst = new stability_measurement();
+            stability_inst.create_stacks();
+
+            foreach (stack_settings item in stability_inst.stack)
+            {
+                item.create_channels();
+            }
+
+            stability_inst.stack[0].channel[0].end_v = -1.234;
+
+            Debug.Print("end V: {0}", stability_inst.stack[0].channel[0].end_v);
         }
 
         private async Task<iv_curve> call_measurement(iv_curve jv_scan)
@@ -422,6 +487,10 @@ namespace QuadSMU_control
                 stability_tab.IsEnabled = true;
                 iv_tab.IsEnabled = true;
 
+                for (int i = 1; i <= num_smu_stacks; i++)
+                {
+                    Debug.Print("Stack {0}", i);
+                }
 
             }
 
@@ -619,6 +688,12 @@ namespace QuadSMU_control
         private void port_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
+        }
+
+        private void smu_channels_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            num_smu_stacks = smu_channels_box.SelectedIndex + 1;
+            Debug.Print("Stacks selected: {0}", num_smu_stacks);
         }
 
         private void start_voltage_TextChanged(object sender, TextChangedEventArgs e)
@@ -929,7 +1004,7 @@ namespace QuadSMU_control
                     stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch4_polarity,
                     stability_sweep_params.ch4_hold_state);
-                
+
                 stability_currentcell_active_area = ch4_jv.active_area;
                 await call_measurement(ch4_jv).ConfigureAwait(false);
                 updateDatagrid(ch4_jv);
