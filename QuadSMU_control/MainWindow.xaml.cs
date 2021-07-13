@@ -65,336 +65,6 @@ namespace QuadSMU_control
         stability_sweep_parameters stability_sweep_params = new stability_sweep_parameters();
         DispatcherTimer stabilityTimer = new DispatcherTimer();
 
-        public class iv_curve
-        {
-
-            public List<double> voltage = new List<double>();
-            public List<double> current = new List<double>();
-            public List<double> power = new List<double>();
-
-            public int start_timestamp;
-            public int end_timestamp;
-            public int scan_duration;
-            public String device_name;
-
-            public double voc;
-            public double jsc;
-            public double fill_factor;
-            public double pce;
-            public double vmpp;
-
-
-            public int smu_channel;
-            public int osr;
-            public int hold_state; // 0 = VOC, 1 = JSC, 2 = MPP 3 = Arb (see arb_hold_v)
-            public int step_delay; // Milliseconds
-            public double v_step_size; // Millivolts
-            public double arb_hold_v; // Arbitrary hold voltage
-            public bool polarity;
-            public bool sweep_direction;
-            public double active_area;
-            public double irradiance;
-            public double start_v;
-            public double end_v;
-            public double i_limit;
-
-            public void calc_voc()
-            {
-                double[] voltage_array = this.voltage.ToArray();
-                double[] current_array = this.current.ToArray();
-                double[] power_array = this.power.ToArray();
-
-                if (current_array[0] < 0)
-                {
-                    Array.Reverse(voltage_array);
-                    Array.Reverse(current_array);
-                    Array.Reverse(power_array);
-                }
-
-                //for (int i = 0; i < voltage_array.Count(); i++)
-                //{
-                //    Debug.Print("{0} \t {1} \t {2}", voltage_array[i], current_array[i], power_array[i]);
-                //}
-
-                double lastPositiveJ = 0;
-                double lastPositiveV = 0;
-
-                double firstNegativeJ = 0;
-                double firstNegativeV = 0;
-
-                int lastPositiveIndex = 0;
-
-                for (int i = 1; i < voltage_array.Count() - 1; i++)
-                {
-                    if (current_array[i] > 0)
-                    {
-                        lastPositiveJ = current_array[i];
-                        lastPositiveV = voltage_array[i];
-
-                        firstNegativeJ = current_array[i + 1];
-                        firstNegativeV = voltage_array[i + 1];
-                    }
-
-                    else if (current_array[i] < 0)
-                    {
-                        lastPositiveIndex = i;
-                        break;
-                    }
-
-                }
-
-                if (lastPositiveIndex == 0)
-                {
-                    this.voc = 0;
-                    Debug.Print("Curve never passes through 0A. Don't calculate VOC");
-                }
-                else
-                {
-                    double vocSlope = (firstNegativeJ - lastPositiveJ) / (firstNegativeV - lastPositiveV);
-                    double jIntercept = lastPositiveJ - (vocSlope * lastPositiveV);
-                    double voc = (0 - jIntercept) / vocSlope;
-                    this.voc = Math.Round(Math.Abs(voc), 3);
-                }
-
-            }
-
-            public void calc_jsc()
-            {
-                double[] voltage_array = voltage.ToArray();
-                double[] current_array = current.ToArray();
-
-                if (voltage_array[0] < 0)
-                {
-                    Array.Reverse(voltage_array);
-                    Array.Reverse(current_array);
-                }
-
-                double lastNegativeV = 0;
-                double lastNegativeJ = 0;
-
-                double firstPositiveV = 0;
-                double firstPositiveJ = 0;
-
-                int lastPositiveIndex = 0;
-
-                for (int i = 1; i < voltage_array.Count() - 1; i++)
-                {
-                    if (voltage_array[i] > 0)
-                    {
-                        lastNegativeV = voltage_array[i];
-                        lastNegativeJ = current_array[i];
-
-                        firstPositiveV = voltage_array[i + 1];
-                        firstPositiveJ = current_array[i + 1];
-                    }
-
-                    else if (voltage_array[i] < 0)
-                    {
-                        lastPositiveIndex = i;
-                        break;
-                    }
-                }
-
-                if (lastPositiveIndex == 0)
-                {
-                    this.jsc = 0;
-                    Debug.Print("Curve never passes through 0V. Don't calculate JSC");
-                }
-                else
-                {
-                    double jscSlope = (firstPositiveV - lastNegativeV) / (firstPositiveJ - lastNegativeJ);
-                    double vIntercept = lastNegativeV - (jscSlope * lastNegativeJ);
-                    double jsc = (0 - vIntercept) / jscSlope;
-
-                    this.jsc = Math.Round((Math.Abs(jsc)), 3);
-                }
-
-            }
-
-            public void calc_fill_factor()
-            {
-                double[] voltage_array = this.voltage.ToArray();
-                double[] current_array = this.current.ToArray();
-                double[] power_array = this.power.ToArray();
-
-                for (int i = 0; i < voltage_array.Count(); i++)
-                {
-                    Debug.Print("{0} \t {1} \t {2}", voltage_array[i], current_array[i], power_array[i]);
-                }
-
-                if (current_array[0] < 0)
-                {
-                    Array.Reverse(voltage_array);
-                    Array.Reverse(current_array);
-                    Array.Reverse(power_array);
-                    Debug.Print("Arrays flipped");
-                }
-
-                try
-                {
-                    // WARNING - Min for PGA281, Max for OLD LT1991
-                    double maximum_power_point = power_array.Max();
-                    //double maximum_power_point = power_array.Min();
-                    int maximum_power_point_index = power_array.ToList().IndexOf(maximum_power_point);
-
-                    this.vmpp = voltage_array[maximum_power_point_index];
-
-                    double fill_factor = Math.Abs(maximum_power_point) / (Math.Abs(this.voc) * Math.Abs(this.jsc));
-
-
-                    Debug.Print("Power array max = {0} at index {1}", maximum_power_point, maximum_power_point_index);
-                    Debug.Print("VOC: {0} \t JSC: {1}", this.voc, this.jsc);
-
-                    if (fill_factor > 1)
-                    {
-                        this.fill_factor = 0;
-                    }
-                    else
-                    {
-                        this.fill_factor = Math.Round(fill_factor, 3);
-                    }
-
-                }
-                catch
-                {
-                    Debug.Print("FF incalculable");
-                }
-            }
-            public void calc_pce()
-            {
-                this.pce = Math.Round(((this.voc * this.jsc * this.fill_factor) / this.irradiance), 3);
-            }
-
-            public void export_file()
-            {
-
-            }
-
-            public void set_start_timestamp()
-            {
-                this.start_timestamp = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-            }
-
-            public void set_end_timestamp()
-            {
-                this.end_timestamp = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-                this.scan_duration = this.end_timestamp - this.start_timestamp;
-            }
-        }
-        public class datagrid_update_class
-        {
-            public String cell_name { get; set; }
-            public double voc { get; set; }
-            public double jsc { get; set; }
-            public double ff { get; set; }
-            public double pce { get; set; }
-
-        }
-
-        public class stability_sweep_parameters
-        {
-            public int params_accessed_count = 0;
-
-            public double stability_irradience;
-
-            public double ch1_start_v;
-            public double ch2_start_v;
-            public double ch3_start_v;
-            public double ch4_start_v;
-
-            public double ch1_end_v;
-            public double ch2_end_v;
-            public double ch3_end_v;
-            public double ch4_end_v;
-
-            public double ch1_step_mv;
-            public double ch2_step_mv;
-            public double ch3_step_mv;
-            public double ch4_step_mv;
-
-            public int ch1_delay_ms;
-            public int ch2_delay_ms;
-            public int ch3_delay_ms;
-            public int ch4_delay_ms;
-
-            public int ch1_ilim_ma;
-            public int ch2_ilim_ma;
-            public int ch3_ilim_ma;
-            public int ch4_ilim_ma;
-
-            public int ch1_osr;
-            public int ch2_osr;
-            public int ch3_osr;
-            public int ch4_osr;
-
-            public double ch1_area_cm2;
-            public double ch2_area_cm2;
-            public double ch3_area_cm2;
-            public double ch4_area_cm2;
-
-            public int ch1_polarity;
-            public int ch2_polarity;
-            public int ch3_polarity;
-            public int ch4_polarity;
-
-            public int ch1_hold_state;
-            public int ch2_hold_state;
-            public int ch3_hold_state;
-            public int ch4_hold_state;
-
-
-
-
-        }
-
-        public class stability_measurement
-        {
-            // Contains up to 16 stacks
-            // Stacks contain 4 channels
-            // Channels contain individual settings
-
-            public stack_settings[] stack = new stack_settings[8];
-
-            public void create_stacks()
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    stack[i] = new stack_settings();
-                }
-            }
-
-        }
-
-        public class stack_settings
-        {
-            public stability_channel_settings[] channel = new stability_channel_settings[4];
-
-            public void create_channels()
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    channel[i] = new stability_channel_settings();
-                }
-            }
-
-        }
-
-        public class stability_channel_settings
-        {
-            public double start_v;
-            public double end_v;
-            public double step_mv;
-            public int delay_ms;
-            public double ilim_ma;
-            public int osr;
-            public double area_cm2;
-            public int polarity;
-            public int hold_state;
-            public double arb_hold_v;
-            public String name;
-            public double irradience;
-
-        }
 
         public MainWindow()
         {
@@ -411,23 +81,21 @@ namespace QuadSMU_control
 
             renderTimer.Interval = TimeSpan.FromMilliseconds(67);
             renderTimer.Tick += RenderGraph;
-            //connect_serial_port();
-            stability_measurement stability_params = new stability_measurement();
 
-            stability_measurement stability_inst = new stability_measurement();
-            stability_inst.create_stacks();
+            //Stability_measurement stability_inst = new Stability_measurement();
+            //stability_inst.create_stacks();
 
-            foreach (stack_settings item in stability_inst.stack)
-            {
-                item.create_channels();
-            }
+            //foreach (Stack_settings item in stability_inst.stack)
+            //{
+            //    item.create_channels();
+            //}
 
-            stability_inst.stack[0].channel[0].end_v = -1.234;
+            //stability_inst.stack[0].channel[0].end_v = -1.234;
 
-            Debug.Print("end V: {0}", stability_inst.stack[0].channel[0].end_v);
+            //Debug.Print("end V: {0}", stability_inst.stack[0].channel[0].end_v);
         }
 
-        private async Task<iv_curve> call_measurement(iv_curve jv_scan)
+        private async Task<iv_curve> CallMeasurement(iv_curve jv_scan)
         {
             iv_curve scan1 = new iv_curve();
 
@@ -435,7 +103,7 @@ namespace QuadSMU_control
             temp_current_list.Clear();
 
             Debug.Print("Sending levels");
-            await Task.Run(() => send_levels(jv_scan));
+            await Task.Run(() => SendLevels(jv_scan));
             Debug.Print("JV sweep completed");
 
             jv_scan.voltage = temp_voltage_list.ToList();
@@ -470,7 +138,7 @@ namespace QuadSMU_control
             return jv_scan;
         }
 
-        private void connect_serial_port(String com_port)
+        private void ConnectSerialPort(String com_port)
         {
             try
             {
@@ -502,7 +170,7 @@ namespace QuadSMU_control
             }
         }
 
-        private void disconnect_Click(object sender, RoutedEventArgs e)
+        private void DisconnectBtnClick(object sender, RoutedEventArgs e)
         {
             sp.DiscardInBuffer();
             sp.DiscardOutBuffer();
@@ -561,7 +229,7 @@ namespace QuadSMU_control
 
         }
 
-        private async Task send_levels(iv_curve new_curve)
+        private async Task SendLevels(iv_curve new_curve)
         {
             measurement_in_progress = true;
 
@@ -668,47 +336,21 @@ namespace QuadSMU_control
             listen_for_data = false;
         }
 
-        private void output_button_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (iv_curve measurement_item in measurements_list)
-            {
-                Debug.Print("{0}", measurement_item.device_name);
-            }
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            //MessageBox.Show("button 1");
-        }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            //MessageBox.Show("button 2");
-        }
-
-        private void port_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
         private void smu_channels_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             num_smu_stacks = smu_channels_box.SelectedIndex + 1;
             Debug.Print("Stacks selected: {0}", num_smu_stacks);
         }
 
-        private void start_voltage_TextChanged(object sender, TextChangedEventArgs e)
-        {
 
-        }
-        private void connect_Click(object sender, RoutedEventArgs e)
+        private void PortConnectBtnClick(object sender, RoutedEventArgs e)
         {
             String com_port_id = port_box.Text;
-            connect_serial_port(com_port_id);
+            ConnectSerialPort(com_port_id);
         }
 
 
-        private async void run_iv_button(object sender, RoutedEventArgs e)
+        private async void RunIVBtnClick(object sender, RoutedEventArgs e)
         {
             if (!measurement_in_progress)
             {
@@ -732,7 +374,7 @@ namespace QuadSMU_control
 
                 iv_curve single_jv = new iv_curve();
 
-                single_jv = generate_measurement_profile(device_name,
+                single_jv = GenerateJVSweepProfile(device_name,
                     smu_channel,
                     start_v,
                     end_v,
@@ -747,21 +389,21 @@ namespace QuadSMU_control
                 );
 
                 string iv_output_path = String.Format("{0}\\{1}.dat", iv_save_datadir, device_name);
-                await call_measurement(single_jv).ConfigureAwait(false);
+                await CallMeasurement(single_jv).ConfigureAwait(false);
 
-                jv_export(iv_output_path, single_jv);
-                add_iv_stats_to_csv(iv_save_datadir, single_jv);
+                JVExport(iv_output_path, single_jv);
+                AddJVStatsToCSV(iv_save_datadir, single_jv);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(single_jv); xstop_iv_button.IsEnabled = false; xrun_iv_button.IsEnabled = true; });
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { UpdateDatagrid(single_jv); xstop_iv_button.IsEnabled = false; xrun_iv_button.IsEnabled = true; });
 
             }
         }
 
 
-        private void updateDatagrid(iv_curve most_recent_iv_curve)
+        private void UpdateDatagrid(iv_curve most_recent_iv_curve)
         {
 
-            var data = new datagrid_update_class
+            var data = new Datagrid_update_class
             {
                 cell_name = most_recent_iv_curve.device_name,
                 voc = most_recent_iv_curve.voc,
@@ -796,37 +438,8 @@ namespace QuadSMU_control
             }
         }
 
-        void PlotAll()
-        {
 
-            jvPlot.plt.Clear();
-
-            foreach (iv_curve measurement in measurements_list)
-            {
-                double[] plot_v_array = measurement.voltage.ToArray();
-                double[] plot_j_array = measurement.current.ToArray();
-
-                jvPlot.plt.PlotScatter(plot_v_array, plot_j_array, lineWidth: 4, markerSize: 10, label: measurement.device_name);
-
-            }
-
-            jvPlot.plt.PlotHLine(0, color: System.Drawing.Color.Black, lineWidth: 1);
-            jvPlot.plt.PlotVLine(0, color: System.Drawing.Color.Black, lineWidth: 1);
-            jvPlot.plt.Legend();
-            jvPlot.plt.AxisAuto(0.1, 0.1); // no horizontal padding, 50% vertical padding
-            jvPlot.Render(skipIfCurrentlyRendering: true);
-
-        }
-
-        void PrintChecked()
-        {
-
-            //IList<String> items = iv_datagrid.SelectedItems.ToString();
-
-
-        }
-
-        private void run_stability_button(object sender, RoutedEventArgs e)
+        private void StartStabilityBtnClick(object sender, RoutedEventArgs e)
         {
             // Start timer
             if (!stability_active)
@@ -843,7 +456,7 @@ namespace QuadSMU_control
 
 
                 stabilityTimer.Interval = TimeSpan.FromSeconds(stability_interval_secs);
-                stabilityTimer.Tick += stability_timer_Tick;
+                stabilityTimer.Tick += StabilityTimerTick;
                 stabilityTimer.Start();
             }
 
@@ -851,7 +464,7 @@ namespace QuadSMU_control
 
         }
 
-        private void halt_stability_button(object sender, RoutedEventArgs e)
+        private void HaltStabilityBtnClick(object sender, RoutedEventArgs e)
         {
             run_stability.IsEnabled = true;
             stop_stability.IsEnabled = false;
@@ -862,7 +475,7 @@ namespace QuadSMU_control
             stability_countdown_textbox.Text = "Not running";
         }
 
-        private async void instant_stability_button(object sender, RoutedEventArgs e)
+        private async void InstantStabilityBtnClick(object sender, RoutedEventArgs e)
         {
             if (stabilityTimer.IsEnabled)
             {
@@ -870,12 +483,12 @@ namespace QuadSMU_control
                 stability_countdown_textbox.Text = "Measurement in progress";
 
                 stabilityTimer.Stop();
-                await run_scheduled_measurements().ConfigureAwait(false);
+                await RunScheduledMeasurements().ConfigureAwait(false);
 
             }
             else
             {
-                await run_scheduled_measurements().ConfigureAwait(false);
+                await RunScheduledMeasurements().ConfigureAwait(false);
                 System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
                     stability_countdown_textbox.Foreground = Brushes.Crimson;
@@ -889,9 +502,9 @@ namespace QuadSMU_control
 
         }
 
-        void stability_timer_Tick(object sender, EventArgs e)
+        void StabilityTimerTick(object sender, EventArgs e)
         {
-            run_scheduled_measurements();
+            RunScheduledMeasurements();
             stabilityTimer.Start();
 
             String next_measurement = String.Format("{0}", DateTime.Now.AddSeconds(stability_interval_secs).ToString("HH:mm:ss"));
@@ -900,7 +513,7 @@ namespace QuadSMU_control
 
         }
 
-        private async Task run_scheduled_measurements()
+        private async Task RunScheduledMeasurements()
         {
             // TODO: Check if stack/channel is enabled in passed-in class
 
@@ -921,7 +534,7 @@ namespace QuadSMU_control
             {
 
                 iv_curve ch1_jv = new iv_curve();
-                ch1_jv = generate_measurement_profile(
+                ch1_jv = GenerateJVSweepProfile(
                     "CH1 device",
                     1,
                     stability_sweep_params.ch1_start_v,
@@ -936,17 +549,17 @@ namespace QuadSMU_control
                     stability_sweep_params.ch1_hold_state);
 
                 stability_currentcell_active_area = ch1_jv.active_area;
-                await call_measurement(ch1_jv).ConfigureAwait(false);
-                updateDatagrid(ch1_jv);
-                set_hold_voltage(ch1_jv);
-                add_stability_stats_to_csv(stability_save_datadir, ch1_jv);
-                stability_jv_export(stability_save_datadir, ch1_jv);
+                await CallMeasurement(ch1_jv).ConfigureAwait(false);
+                UpdateDatagrid(ch1_jv);
+                SetHoldVoltage(ch1_jv);
+                AddStabilityStatsToCSV(stability_save_datadir, ch1_jv);
+                StabilityJVExport(stability_save_datadir, ch1_jv);
             }
 
             if (ch2_enabled)
             {
                 iv_curve ch2_jv = new iv_curve();
-                ch2_jv = generate_measurement_profile(
+                ch2_jv = GenerateJVSweepProfile(
                     "CH2 device",
                     2,
                     stability_sweep_params.ch2_start_v,
@@ -961,17 +574,17 @@ namespace QuadSMU_control
                     stability_sweep_params.ch2_hold_state);
 
                 stability_currentcell_active_area = ch2_jv.active_area;
-                await call_measurement(ch2_jv).ConfigureAwait(false);
-                updateDatagrid(ch2_jv);
-                set_hold_voltage(ch2_jv);
-                add_stability_stats_to_csv(stability_save_datadir, ch2_jv);
-                stability_jv_export(stability_save_datadir, ch2_jv);
+                await CallMeasurement(ch2_jv).ConfigureAwait(false);
+                UpdateDatagrid(ch2_jv);
+                SetHoldVoltage(ch2_jv);
+                AddStabilityStatsToCSV(stability_save_datadir, ch2_jv);
+                StabilityJVExport(stability_save_datadir, ch2_jv);
             }
 
             if (ch3_enabled)
             {
                 iv_curve ch3_jv = new iv_curve();
-                ch3_jv = generate_measurement_profile(
+                ch3_jv = GenerateJVSweepProfile(
                     "CH3 device",
                     3,
                     stability_sweep_params.ch3_start_v,
@@ -986,17 +599,17 @@ namespace QuadSMU_control
                     stability_sweep_params.ch3_hold_state);
 
                 stability_currentcell_active_area = ch3_jv.active_area;
-                await call_measurement(ch3_jv).ConfigureAwait(false);
-                updateDatagrid(ch3_jv);
-                set_hold_voltage(ch3_jv);
-                add_stability_stats_to_csv(stability_save_datadir, ch3_jv);
-                stability_jv_export(stability_save_datadir, ch3_jv);
+                await CallMeasurement(ch3_jv).ConfigureAwait(false);
+                UpdateDatagrid(ch3_jv);
+                SetHoldVoltage(ch3_jv);
+                AddStabilityStatsToCSV(stability_save_datadir, ch3_jv);
+                StabilityJVExport(stability_save_datadir, ch3_jv);
             }
 
             if (ch4_enabled)
             {
                 iv_curve ch4_jv = new iv_curve();
-                ch4_jv = generate_measurement_profile(
+                ch4_jv = GenerateJVSweepProfile(
                     "CH4 device",
                     4,
                     stability_sweep_params.ch4_start_v,
@@ -1011,18 +624,18 @@ namespace QuadSMU_control
                     stability_sweep_params.ch4_hold_state);
 
                 stability_currentcell_active_area = ch4_jv.active_area;
-                await call_measurement(ch4_jv).ConfigureAwait(false);
-                updateDatagrid(ch4_jv);
-                set_hold_voltage(ch4_jv);
-                add_stability_stats_to_csv(stability_save_datadir, ch4_jv);
-                stability_jv_export(stability_save_datadir, ch4_jv);
+                await CallMeasurement(ch4_jv).ConfigureAwait(false);
+                UpdateDatagrid(ch4_jv);
+                SetHoldVoltage(ch4_jv);
+                AddStabilityStatsToCSV(stability_save_datadir, ch4_jv);
+                StabilityJVExport(stability_save_datadir, ch4_jv);
             }
 
             renderTimer.Stop();
             return;
         }
 
-        void set_hold_voltage(iv_curve ivcurve)
+        void SetHoldVoltage(iv_curve ivcurve)
         {
             // Apply the hold voltage to the SMU channel in question
             int smu_channel = ivcurve.smu_channel;
@@ -1054,14 +667,14 @@ namespace QuadSMU_control
             }
         }
 
-        private void stability_params_button(object sender, RoutedEventArgs e)
+        private void OpenStabilityParamsBtnClick(object sender, RoutedEventArgs e)
         {
             stability_settings stability_param_dialog = new stability_settings(stability_sweep_params);
 
             stability_param_dialog.Show();
         }
 
-        public iv_curve generate_measurement_profile(
+        public iv_curve GenerateJVSweepProfile(
             string device_name,
             int smu_channel,
             double start_v,
@@ -1094,7 +707,7 @@ namespace QuadSMU_control
             return iv_profile;
         }
 
-        private void jv_export(string datadir, iv_curve ivcurve)
+        private void JVExport(string datadir, iv_curve ivcurve)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -1130,7 +743,7 @@ namespace QuadSMU_control
             Debug.Print("jv_export took {0}ms", watch.ElapsedMilliseconds);
         }
 
-        private void stability_jv_export(string datadir, iv_curve ivcurve)
+        private void StabilityJVExport(string datadir, iv_curve ivcurve)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -1166,7 +779,7 @@ namespace QuadSMU_control
             Debug.Print("stability_jv_export took {0}ms", watch.ElapsedMilliseconds);
         }
 
-        private void add_stability_stats_to_csv(string datadir, iv_curve ivcurve)
+        private void AddStabilityStatsToCSV(string datadir, iv_curve ivcurve)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -1191,7 +804,7 @@ namespace QuadSMU_control
             Debug.Print("add_stability_stats_to_csv took {0}ms", watch.ElapsedMilliseconds);
         }
 
-        private void add_iv_stats_to_csv(string datadir, iv_curve ivcurve)
+        private void AddJVStatsToCSV(string datadir, iv_curve ivcurve)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -1216,7 +829,7 @@ namespace QuadSMU_control
             Debug.Print("add_stability_stats_to_csv took {0}ms", watch.ElapsedMilliseconds);
         }
 
-        private void stability_savedir_button(object sender, RoutedEventArgs e)
+        private void StabilitySaveDirBtnClick(object sender, RoutedEventArgs e)
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
             if (dialog.ShowDialog() == WinForms.DialogResult.OK)
@@ -1229,12 +842,12 @@ namespace QuadSMU_control
             }
         }
 
-        private void stop_iv_button(object sender, RoutedEventArgs e)
+        private void StopJVBtnClick(object sender, RoutedEventArgs e)
         {
             cancel_iv_scan = true;
         }
 
-        private void open_iv_datadir_button(object sender, RoutedEventArgs e)
+        private void OpenJVDataDirBtnClick(object sender, RoutedEventArgs e)
         {
             string open_folder_directory = iv_save_datadir;
 
@@ -1245,7 +858,7 @@ namespace QuadSMU_control
 
         }
 
-        private void save_iv_datadir_button(object sender, RoutedEventArgs e)
+        private void SaveJVDataDirBtnClick(object sender, RoutedEventArgs e)
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
             System.Windows.Forms.DialogResult result = dialog.ShowDialog();
@@ -1258,7 +871,7 @@ namespace QuadSMU_control
 
         }
 
-        private void manual_tab_selected(object sender, MouseButtonEventArgs e)
+        private void ManualTabSelected(object sender, MouseButtonEventArgs e)
         {
             PlottableScatter manual_plot;
 

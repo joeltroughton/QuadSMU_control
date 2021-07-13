@@ -1,0 +1,31 @@
+﻿<Page x:Class="QuadSMU_control.jv_page"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:QuadSMU_control"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="jv_page">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <WpfPlot Name="jvPlot" Margin="10" Grid.Row="0"/>
+
+        <DataGrid x:Name="iv_datagrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Extended" >
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Header="Plot" Binding="{Binding IsSelected}" />
+                <DataGridTextColumn Header="Device ID" Binding="{Binding Path=cell_name}" Width="*" />
+                <DataGridTextColumn Header="VOC (V)" Binding="{Binding Path=voc}" Width="*" />
+                <DataGridTextColumn Header="JSC (mA cm-2)" Binding="{Binding Path=jsc}" Width="*" />
+                <DataGridTextColumn Header="Fill factor" Binding="{Binding Path=ff}" Width="*" />
+                <DataGridTextColumn Header="PCE (%)" Binding="{Binding Path=pce}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Page>

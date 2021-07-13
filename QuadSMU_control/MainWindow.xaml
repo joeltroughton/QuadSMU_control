@@ -35,7 +35,7 @@
 
                 <Fluent:RibbonGroupBox Header="Port select" Width="100" Grid.IsSharedSizeScope="True">
 
-                    <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1" Margin="0,25,0,0"/>
+                    <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectedIndex="1" Margin="0,25,0,0"/>
 
                 </Fluent:RibbonGroupBox>
 
@@ -47,7 +47,7 @@
                 <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
 
 
-                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect" IsEnabled="True">
+                    <Fluent:Button Name="xconnect_button" Size="Large" Click="PortConnectBtnClick" Header="Connect" IsEnabled="True">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
                         </Fluent:Button.LargeIcon>
@@ -138,13 +138,13 @@
 
                 <Fluent:RibbonGroupBox Header="Save"  HorizontalContentAlignment="Center">
 
-                    <Fluent:Button Grid.Row="1" Size="Large" Click="save_iv_datadir_button" Header="Select save directory">
+                    <Fluent:Button Grid.Row="1" Size="Large" Click="SaveJVDataDirBtnClick" Header="Select save directory">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
-                    <Fluent:Button Size="Large" Click="open_iv_datadir_button" Header="Open save directory">
+                    <Fluent:Button Size="Large" Click="OpenJVDataDirBtnClick" Header="Open save directory">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_FolderOpen" Foreground="CornflowerBlue"/>
                         </Fluent:Button.LargeIcon>
@@ -153,13 +153,13 @@
 
                 <Fluent:RibbonGroupBox Header="Sweep control"  HorizontalContentAlignment="Center">
 
-                    <Fluent:Button x:Name="xrun_iv_button" Size="Large" Click="run_iv_button" Header="Run I-V sweep" IsEnabled="False">
+                    <Fluent:Button x:Name="xrun_iv_button" Size="Large" Click="RunIVBtnClick" Header="Run I-V sweep" IsEnabled="False">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
-                    <Fluent:Button x:Name="xstop_iv_button" Size="Large" Click="stop_iv_button" Header="Abort I-V sweep" IsEnabled="False">
+                    <Fluent:Button x:Name="xstop_iv_button" Size="Large" Click="StopJVBtnClick" Header="Abort I-V sweep" IsEnabled="False">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="Crimson"/>
                         </Fluent:Button.LargeIcon>
@@ -180,7 +180,7 @@
 
                 <Fluent:RibbonGroupBox Header="J-V scan">
 
-                    <Fluent:Button Size="Large" Click="stability_params_button" Header="Change scan parameters">
+                    <Fluent:Button Size="Large" Click="OpenStabilityParamsBtnClick" Header="Change scan parameters">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Cog" Foreground="CornflowerBlue"/>
                         </Fluent:Button.LargeIcon>
@@ -211,7 +211,7 @@
                         <TextBlock Grid.Row="1" Grid.Column="0"  Grid.ColumnSpan="2" Text="Save directory" HorizontalAlignment="Left" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
                         <Fluent:TextBox Grid.Row="2" Grid.Column="0" x:Name="stability_savedir" Width="120"  Text="C:\data" HorizontalAlignment="Left"  Margin="-5,0,0,0"/>
 
-                        <Fluent:Button Grid.Row="2" Grid.Column="1" Size="Small" Click="stability_savedir_button" HorizontalAlignment="Center">
+                        <Fluent:Button Grid.Row="2" Grid.Column="1" Size="Small" Click="StabilitySaveDirBtnClick" HorizontalAlignment="Center">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
                             </Fluent:Button.Icon>
@@ -230,19 +230,19 @@
 
                         </Grid.RowDefinitions>
 
-                        <Fluent:Button Grid.Row="0" Name="run_stability" Size="Middle" Click="run_stability_button" Header="Start timer" IsEnabled="True">
+                        <Fluent:Button Grid.Row="0" Name="run_stability" Size="Middle" Click="StartStabilityBtnClick" Header="Start timer" IsEnabled="True">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="LimeGreen"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
-                        <Fluent:Button Grid.Row="1" Name="stop_stability" Size="Middle" Click="halt_stability_button" Header="Stop timer">
+                        <Fluent:Button Grid.Row="1" Name="stop_stability" Size="Middle" Click="HaltStabilityBtnClick" Header="Stop timer">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="Crimson"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
-                        <Fluent:Button Grid.Row="2" Size="Middle" Click="instant_stability_button" Header="Measure now">
+                        <Fluent:Button Grid.Row="2" Size="Middle" Click="InstantStabilityBtnClick" Header="Measure now">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Orange"/>
                             </Fluent:Button.Icon>
@@ -267,7 +267,7 @@
 
 
 
-            <Fluent:RibbonTabItem Header="Manual control" MouseLeftButtonUp="manual_tab_selected" IsEnabled="False">
+            <Fluent:RibbonTabItem Header="Manual control" MouseLeftButtonUp="ManualTabSelected" IsEnabled="True">
                 <Fluent:RibbonGroupBox Header="SMU channel">
                     <Fluent:ComboBox Size="Large" x:Name="spo_smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0">
                     </Fluent:ComboBox>
@@ -297,19 +297,19 @@
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="Control" HorizontalContentAlignment="Center" >
-                    <Fluent:Button x:Name="start_manual" Size="Large" Click="run_iv_button" Header="Run" Width="40" IsEnabled="True">
+                    <Fluent:Button x:Name="start_manual" Size="Large" Click="RunIVBtnClick" Header="Run" Width="40" IsEnabled="True">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
-                    <Fluent:Button x:Name="stop_manual" Size="Large" Click="run_iv_button" Header="Stop" Width="40" IsEnabled="True" Margin="5,0,5,0">
+                    <Fluent:Button x:Name="stop_manual" Size="Large" Click="RunIVBtnClick" Header="Stop" Width="40" IsEnabled="True" Margin="5,0,5,0">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_StopCircle" Foreground="Crimson"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 
-                    <Fluent:Button x:Name="export_manual" Size="Large" Click="run_iv_button" Header="Export data" Width="40" IsEnabled="True" Margin="5,0,5,0">
+                    <Fluent:Button x:Name="export_manual" Size="Large" Click="RunIVBtnClick" Header="Export data" Width="40" IsEnabled="True" Margin="5,0,5,0">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Save" Foreground="CornflowerBlue"/>
                         </Fluent:Button.LargeIcon>
@@ -318,38 +318,31 @@
 
             </Fluent:RibbonTabItem>
 
-
-
-
         </Fluent:Ribbon>
 
-
-
         <Grid Grid.Row="1">
-            
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                    <WpfPlot Name="jvPlot" Margin="10" Grid.Row="0"/>
+            <WpfPlot Name="jvPlot" Margin="10" Grid.Row="0"/>
 
-                    <DataGrid x:Name="iv_datagrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Extended" >
-                        <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Header="Plot" Binding="{Binding IsSelected}" />
-                            <DataGridTextColumn Header="Device ID" Binding="{Binding Path=cell_name}" Width="*" />
-                            <DataGridTextColumn Header="VOC (V)" Binding="{Binding Path=voc}" Width="*" />
-                            <DataGridTextColumn Header="JSC (mA cm-2)" Binding="{Binding Path=jsc}" Width="*" />
-                            <DataGridTextColumn Header="Fill factor" Binding="{Binding Path=ff}" Width="*" />
-                            <DataGridTextColumn Header="PCE (%)" Binding="{Binding Path=pce}" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
+            <DataGrid x:Name="iv_datagrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Extended" >
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Header="Plot" Binding="{Binding IsSelected}" />
+                    <DataGridTextColumn Header="Device ID" Binding="{Binding Path=cell_name}" Width="*" />
+                    <DataGridTextColumn Header="VOC (V)" Binding="{Binding Path=voc}" Width="*" />
+                    <DataGridTextColumn Header="JSC (mA cm-2)" Binding="{Binding Path=jsc}" Width="*" />
+                    <DataGridTextColumn Header="Fill factor" Binding="{Binding Path=ff}" Width="*" />
+                    <DataGridTextColumn Header="PCE (%)" Binding="{Binding Path=pce}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
 
-                </Grid>
         </Grid>
+
     </Grid>
-    
+
 
 
 </Fluent:RibbonWindow>
