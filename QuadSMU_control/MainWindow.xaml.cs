@@ -398,6 +398,7 @@ namespace QuadSMU_control
 
         public MainWindow()
         {
+
             this.InitializeComponent();
             port_box.ItemsSource = ports;
             smu_channel_box.ItemsSource = smu_channels;
@@ -901,6 +902,8 @@ namespace QuadSMU_control
 
         private async Task run_scheduled_measurements()
         {
+            // TODO: Check if stack/channel is enabled in passed-in class
+
             bool ch1_enabled = (bool)smu_ch_1_box.IsChecked;
             bool ch2_enabled = (bool)smu_ch_2_box.IsChecked;
             bool ch3_enabled = (bool)smu_ch_3_box.IsChecked;
@@ -911,6 +914,8 @@ namespace QuadSMU_control
             renderTimer.Start();
 
             string ch1_save_dir = stability_save_datadir;
+
+            // TODO: Replace with for(each?) loop to iterate over all enabled channels 
 
             if (ch1_enabled)
             {
@@ -1257,6 +1262,11 @@ namespace QuadSMU_control
         {
             PlottableScatter manual_plot;
 
+
+        }
+
+        private void RibbonTabItem_MouseUp(object sender, MouseButtonEventArgs e)
+        {
 
         }
     }

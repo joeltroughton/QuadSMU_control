@@ -31,7 +31,7 @@
 
             <!--Tabs-->
 
-            <Fluent:RibbonTabItem Header="Setup">
+            <Fluent:RibbonTabItem Header="Setup" MouseUp="RibbonTabItem_MouseUp">
 
                 <Fluent:RibbonGroupBox Header="Port select" Width="100" Grid.IsSharedSizeScope="True">
 
@@ -46,7 +46,7 @@
 
                 <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
 
-                    
+
                     <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect" IsEnabled="True">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
@@ -318,7 +318,7 @@
 
             </Fluent:RibbonTabItem>
 
-            
+
 
 
         </Fluent:Ribbon>
@@ -326,28 +326,30 @@
 
 
         <Grid Grid.Row="1">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <WpfPlot Name="jvPlot" Margin="10" Grid.Row="0"/>
+                    <WpfPlot Name="jvPlot" Margin="10" Grid.Row="0"/>
 
-                <DataGrid x:Name="iv_datagrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Extended" >
-                    <DataGrid.Columns>
-                        <DataGridCheckBoxColumn Header="Plot" Binding="{Binding IsSelected}" />
-                        <DataGridTextColumn Header="Device ID" Binding="{Binding Path=cell_name}" Width="*" />
-                        <DataGridTextColumn Header="VOC (V)" Binding="{Binding Path=voc}" Width="*" />
-                        <DataGridTextColumn Header="JSC (mA cm-2)" Binding="{Binding Path=jsc}" Width="*" />
-                        <DataGridTextColumn Header="Fill factor" Binding="{Binding Path=ff}" Width="*" />
-                        <DataGridTextColumn Header="PCE (%)" Binding="{Binding Path=pce}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                    <DataGrid x:Name="iv_datagrid" Grid.Row="1" IsReadOnly="True" SelectionMode="Extended" >
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="Plot" Binding="{Binding IsSelected}" />
+                            <DataGridTextColumn Header="Device ID" Binding="{Binding Path=cell_name}" Width="*" />
+                            <DataGridTextColumn Header="VOC (V)" Binding="{Binding Path=voc}" Width="*" />
+                            <DataGridTextColumn Header="JSC (mA cm-2)" Binding="{Binding Path=jsc}" Width="*" />
+                            <DataGridTextColumn Header="Fill factor" Binding="{Binding Path=ff}" Width="*" />
+                            <DataGridTextColumn Header="PCE (%)" Binding="{Binding Path=pce}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-            </Grid>
+                </Grid>
         </Grid>
     </Grid>
+    
 
 
 </Fluent:RibbonWindow>
