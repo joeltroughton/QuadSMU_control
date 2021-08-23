@@ -426,12 +426,16 @@ namespace QuadSMU_control
                 stability_tab.IsEnabled = true;
                 iv_tab.IsEnabled = true;
 
+                smu_msg_block.Text = "Connected";
+                smu_msg_block.Foreground = Brushes.LimeGreen;
+
 
             }
 
             catch (Exception)
             {
                 smu_msg_block.Text = "Connection failed. Is the correct port selected?";
+                smu_msg_block.Foreground = Brushes.Crimson;
                 //MessageBox.Show("Connection failed. Is the correct port selected?");
             }
         }
@@ -1147,6 +1151,8 @@ namespace QuadSMU_control
             if (dialog.ShowDialog() == WinForms.DialogResult.OK)
             {
                 stability_savedir.Text = dialog.SelectedPath;
+                run_stability.IsEnabled = true;
+                stop_stability.IsEnabled = true;
             }
             else
             {

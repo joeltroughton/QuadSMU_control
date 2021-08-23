@@ -193,19 +193,19 @@
 
                         </Grid.RowDefinitions>
 
-                        <Fluent:Button Grid.Row="0" Name="run_stability" Size="Middle" Click="run_stability_button" Header="Start timer" IsEnabled="True">
+                        <Fluent:Button Grid.Row="0" Name="run_stability" Size="Middle" Click="run_stability_button" Header="Start timer" IsEnabled="False" ToolTip="Select a save folder before starting stability measurements">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="LimeGreen"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
-                        <Fluent:Button Grid.Row="1" Name="stop_stability" Size="Middle" Click="halt_stability_button" Header="Stop timer">
+                        <Fluent:Button Grid.Row="1" Name="stop_stability" Size="Middle" Click="halt_stability_button" Header="Stop timer" IsEnabled="False">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_Stopwatch" Foreground="Crimson"/>
                             </Fluent:Button.Icon>
                         </Fluent:Button>
 
-                        <Fluent:Button Grid.Row="2" Size="Middle" Click="instant_stability_button" Header="Measure now">
+                        <Fluent:Button Grid.Row="2" Size="Middle" Click="instant_stability_button" Header="Measure now" Visibility="Hidden">
                             <Fluent:Button.Icon>
                                 <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="Orange"/>
                             </Fluent:Button.Icon>
@@ -230,7 +230,7 @@
 
 
 
-            <Fluent:RibbonTabItem Header="Manual control" MouseLeftButtonUp="manual_tab_selected" IsEnabled="False">
+            <Fluent:RibbonTabItem Header="Manual control" MouseLeftButtonUp="manual_tab_selected" IsEnabled="False" ToolTip="Work in progress!">
                 <Fluent:RibbonGroupBox Header="SMU channel">
                     <Fluent:ComboBox Size="Large" x:Name="spo_smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0">
                     </Fluent:ComboBox>
@@ -281,9 +281,9 @@
 
             </Fluent:RibbonTabItem>
 
-            <Fluent:RibbonTabItem Header="Setup">
+            <Fluent:RibbonTabItem Header="Setup" ToolTip="Select SMU device (Very buggy. Bad Windows COM drivers)">
 
-                <Fluent:RibbonGroupBox Header="Port select" Width="100" Grid.IsSharedSizeScope="True">
+                <Fluent:RibbonGroupBox Header="Port select" Width="80" Grid.IsSharedSizeScope="True">
 
                     <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1" Margin="0,25,0,0"/>
 
@@ -292,9 +292,9 @@
 
 
 
-                <Fluent:RibbonGroupBox Header="Connection" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
+                <Fluent:RibbonGroupBox Header="Connection" Width="80" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
 
-                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect" IsEnabled="True">
+                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect to SMU" IsEnabled="True">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
                         </Fluent:Button.LargeIcon>
@@ -308,8 +308,8 @@
 
                 </Fluent:RibbonGroupBox>
 
-                <Fluent:RibbonGroupBox Header="SMU messages" HorizontalAlignment="Center">
-                    <TextBlock x:Name="smu_msg_block" TextWrapping="Wrap" Width="200" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+                <Fluent:RibbonGroupBox HorizontalAlignment="Center">
+                    <TextBlock x:Name="smu_msg_block" TextWrapping="Wrap" Width="200" HorizontalAlignment="Center" Margin="0,0,0,0" Text="Welcome to QuadSMU Control &#x0a;&#x0a;Select the SMU's COM port and press &quot;Connect&quot;"/>
 
                 </Fluent:RibbonGroupBox>
 
