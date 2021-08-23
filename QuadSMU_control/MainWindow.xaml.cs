@@ -63,6 +63,7 @@ namespace QuadSMU_control
 
         DispatcherTimer stabilityTimer = new DispatcherTimer();
 
+
         public class iv_curve
         {
 
@@ -230,7 +231,7 @@ namespace QuadSMU_control
                 try
                 {
                     // WARNING - Min for PGA281, Max for OLD LT1991
-                    double maximum_power_point = power_array.Max();
+                    double maximum_power_point = power_array.Min();
                     //double maximum_power_point = power_array.Min();
                     int maximum_power_point_index = power_array.ToList().IndexOf(maximum_power_point);
 
@@ -350,6 +351,9 @@ namespace QuadSMU_control
             port_box.ItemsSource = ports;
             smu_channel_box.ItemsSource = smu_channels;
             spo_smu_channel_box.ItemsSource = smu_channels;
+
+            end_voltage.Value = -0.2;
+
 
             jvPlot.plt.YLabel("Current density (mA/cm²)");
             jvPlot.plt.XLabel("Voltage (V)");
@@ -533,6 +537,7 @@ namespace QuadSMU_control
 
             //Set current limit & OSR, then set the voltage to the start level and enable the output
             string send = String.Format("CH{0}:CUR {1}", new_curve.smu_channel, new_curve.i_limit);
+            //string send = String.Format("ILIM {0} 2048", new_curve.smu_channel, new_curve.i_limit);
             sp.WriteLine(send);
             await Task.Delay(5);
 

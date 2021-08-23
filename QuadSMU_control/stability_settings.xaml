@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QuadSMU_control"
         mc:Ignorable="d"
-        Title="stability_settings" Height="700" Width="300"
-        Closing="stability_sweep_param_window_close">
+        Title="stability_settings" Height="300" Width="300"
+        Closing="stability_sweep_param_window_close"
+        ResizeMode="NoResize">
     <Grid>
         <Border Padding="10" >
-            <ScrollViewer>
+            <ScrollViewer VerticalScrollBarVisibility="Disabled">
 
                 <StackPanel >
 

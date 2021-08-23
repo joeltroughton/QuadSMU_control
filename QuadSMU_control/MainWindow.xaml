@@ -4,7 +4,7 @@
                      xmlns:Fluent="urn:fluent-ribbon"
                      xmlns:fa5="http://schemas.fontawesome.com/icons/"
                      Title="QuadSMU Control" 
-                     Width="800" 
+                     Width="820" 
                      Height="600">
     <Grid>
 
@@ -36,7 +36,7 @@
                 <Fluent:RibbonGroupBox Header="SMU channel">
 
 
-                    <Fluent:ComboBox Size="Large" x:Name="smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0">
+                    <Fluent:ComboBox Size="Large" x:Name="smu_channel_box" IsEditable="False" SelectedIndex="0" Margin="0,25,5,0" IsEnabled="False">
 
 
                     </Fluent:ComboBox>
@@ -135,10 +135,10 @@
             <Fluent:RibbonTabItem x:Name="stability_tab" Header="Stability" IsEnabled="True">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
-                    <Fluent:CheckBox  Header="Ch 1" x:Name="smu_ch_1_box" />
-                    <Fluent:CheckBox  Header="Ch 2" x:Name="smu_ch_2_box"/>
-                    <Fluent:CheckBox  Header="Ch 3" x:Name="smu_ch_3_box"/>
-                    <Fluent:CheckBox  Header="Ch 4" x:Name="smu_ch_4_box"/>
+                    <Fluent:CheckBox  Header="Ch 1" x:Name="smu_ch_1_box" IsChecked="True" IsEnabled="False"/>
+                    <Fluent:CheckBox  Header="Ch 2" x:Name="smu_ch_2_box" IsChecked="False" IsEnabled="False"/>
+                    <Fluent:CheckBox  Header="Ch 3" x:Name="smu_ch_3_box" IsChecked="False" IsEnabled="False"/>
+                    <Fluent:CheckBox  Header="Ch 4" x:Name="smu_ch_4_box" IsChecked="False" IsEnabled="False"/>
                 </Fluent:RibbonGroupBox>
 
                 <Fluent:RibbonGroupBox Header="J-V scan">
