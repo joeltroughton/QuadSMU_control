@@ -31,6 +31,40 @@
 
             <!--Tabs-->
 
+            <Fluent:RibbonTabItem Header="Setup">
+
+                <Fluent:RibbonGroupBox Header="Port select" Width="80" Grid.IsSharedSizeScope="True">
+
+                    <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1" Margin="0,25,0,0"/>
+
+                </Fluent:RibbonGroupBox>
+
+
+
+
+                <Fluent:RibbonGroupBox Header="Connection" Width="80" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
+
+                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect to SMU" IsEnabled="True">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <!--<Fluent:Button Name="xdisconnect_button" Size="Large" Click="disconnect_Click" Header="Disconnect" IsEnabled="False">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_Unlink" Foreground="Crimson"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>-->
+
+                </Fluent:RibbonGroupBox>
+
+                <Fluent:RibbonGroupBox HorizontalAlignment="Center">
+                    <TextBlock x:Name="smu_msg_block" TextWrapping="Wrap" Width="200" HorizontalAlignment="Center" Margin="0,0,0,0" Text="Welcome to QuadSMU Control &#x0a;&#x0a;Select the SMU's COM port and press &quot;Connect&quot;"/>
+
+                </Fluent:RibbonGroupBox>
+
+            </Fluent:RibbonTabItem>
+
             <Fluent:RibbonTabItem x:Name="iv_tab" Header="I-V sweep" IsEnabled="True">
 
                 <Fluent:RibbonGroupBox Header="SMU channel">
@@ -281,39 +315,7 @@
 
             </Fluent:RibbonTabItem>
 
-            <Fluent:RibbonTabItem Header="Setup" ToolTip="Select SMU device (Very buggy. Bad Windows COM drivers)">
-
-                <Fluent:RibbonGroupBox Header="Port select" Width="80" Grid.IsSharedSizeScope="True">
-
-                    <Fluent:ComboBox x:Name="port_box" Text="Select port" SelectionChanged="port_box_SelectionChanged" SelectedIndex="1" Margin="0,25,0,0"/>
-
-                </Fluent:RibbonGroupBox>
-
-
-
-
-                <Fluent:RibbonGroupBox Header="Connection" Width="80" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Center">
-
-                    <Fluent:Button Name="xconnect_button" Size="Large" Click="connect_Click" Header="Connect to SMU" IsEnabled="True">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_Link" Foreground="LimeGreen"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>
-
-                    <!--<Fluent:Button Name="xdisconnect_button" Size="Large" Click="disconnect_Click" Header="Disconnect" IsEnabled="False">
-                        <Fluent:Button.LargeIcon>
-                            <fa5:ImageAwesome Icon="Solid_Unlink" Foreground="Crimson"/>
-                        </Fluent:Button.LargeIcon>
-                    </Fluent:Button>-->
-
-                </Fluent:RibbonGroupBox>
-
-                <Fluent:RibbonGroupBox HorizontalAlignment="Center">
-                    <TextBlock x:Name="smu_msg_block" TextWrapping="Wrap" Width="200" HorizontalAlignment="Center" Margin="0,0,0,0" Text="Welcome to QuadSMU Control &#x0a;&#x0a;Select the SMU's COM port and press &quot;Connect&quot;"/>
-
-                </Fluent:RibbonGroupBox>
-
-            </Fluent:RibbonTabItem>
+            
 
 
         </Fluent:Ribbon>
