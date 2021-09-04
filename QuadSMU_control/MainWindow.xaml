@@ -4,7 +4,7 @@
                      xmlns:Fluent="urn:fluent-ribbon"
                      xmlns:fa5="http://schemas.fontawesome.com/icons/"
                      Title="QuadSMU Control" 
-                     Width="820" 
+                     Width="860" 
                      Height="600">
     <Grid>
 
@@ -153,6 +153,12 @@
                     <Fluent:Button x:Name="xrun_iv_button" Size="Large" Click="run_iv_button" Header="Run I-V sweep" IsEnabled="False">
                         <Fluent:Button.LargeIcon>
                             <fa5:ImageAwesome Icon="Solid_PlayCircle" Foreground="LimeGreen"/>
+                        </Fluent:Button.LargeIcon>
+                    </Fluent:Button>
+
+                    <Fluent:Button x:Name="xrun_iv_button_fr" Size="Large" Click="run_iv_button_fr" Header="Run F/R sweep" IsEnabled="False">
+                        <Fluent:Button.LargeIcon>
+                            <fa5:ImageAwesome Icon="Solid_ArrowsAltH" Foreground="LimeGreen"/>
                         </Fluent:Button.LargeIcon>
                     </Fluent:Button>
 

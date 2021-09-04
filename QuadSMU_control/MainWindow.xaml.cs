@@ -690,6 +690,100 @@ namespace QuadSMU_control
             }
         }
 
+        private async void run_iv_button_fr(object sender, RoutedEventArgs e)
+        {
+            if (!measurement_in_progress)
+            {
+                xrun_iv_button.IsEnabled = false;
+                xrun_iv_button_fr.IsEnabled = false;
+                xstop_iv_button.IsEnabled = true;
+                cancel_iv_scan = false;
+                renderTimer.Start();
+                int smu_channel = smu_channel_box.SelectedIndex + 1;
+                double start_v = double.Parse(start_voltage.Text);
+                double end_v = double.Parse(end_voltage.Text);
+                int step_size = int.Parse(step_size_mv.Text);
+                double i_limit_ma = double.Parse(i_limit.Text);
+                int delay_time = int.Parse(delay_time_ms.Text);
+                double dirradience = double.Parse(irradience.Text);
+                string device_name = cell_name.Text;
+                int iosr = int.Parse(osr.Text);
+                double active_area = double.Parse(active_area_textbox.Text);
+                int polarity = 0;
+                int hold_state = 0;
+
+
+                iv_curve first_single_jv = new iv_curve();
+                iv_curve second_single_jv = new iv_curve();
+
+                first_single_jv = generate_measurement_profile(device_name,
+                    smu_channel,
+                    start_v,
+                    end_v,
+                   step_size,
+                   delay_time,
+                   i_limit_ma,
+                   iosr,
+                   active_area,
+                   dirradience,
+                   polarity,
+                   hold_state
+                );
+
+
+                second_single_jv = generate_measurement_profile(device_name,
+                    smu_channel,
+                    end_v,
+                    start_v,
+                   step_size,
+                   delay_time,
+                   i_limit_ma,
+                   iosr,
+                   active_area,
+                   dirradience,
+                   polarity,
+                   hold_state
+                );
+
+                string first_iv_output_path;
+                string second_iv_output_path;
+
+                if (start_v > end_v)
+                {
+                    first_single_jv.device_name += "_rev";
+                    second_single_jv.device_name += "_fwd";
+
+                    first_iv_output_path = String.Format("{0}\\{1}_rev.dat", iv_save_datadir, device_name);
+                    second_iv_output_path = String.Format("{0}\\{1}_fwd.dat", iv_save_datadir, device_name);
+
+                }
+                else
+                {
+                    first_single_jv.device_name += "_fwd";
+                    second_single_jv.device_name += "_rev";
+
+                    first_iv_output_path = String.Format("{0}\\{1}_rev.dat", iv_save_datadir, device_name);
+                    second_iv_output_path = String.Format("{0}\\{1}_fwd.dat", iv_save_datadir, device_name);
+                }
+
+                await call_measurement(first_single_jv).ConfigureAwait(false);
+
+                jv_export(first_iv_output_path, first_single_jv);
+                add_iv_stats_to_csv(iv_save_datadir, first_single_jv);
+
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(first_single_jv); xstop_iv_button.IsEnabled = false; xrun_iv_button.IsEnabled = true; });
+
+
+                await call_measurement(second_single_jv).ConfigureAwait(false);
+
+                jv_export(second_iv_output_path, second_single_jv);
+                add_iv_stats_to_csv(iv_save_datadir, second_single_jv);
+
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(second_single_jv); xstop_iv_button.IsEnabled = false; xrun_iv_button.IsEnabled = true; });
+
+            }
+        }
+
 
         private void updateDatagrid(iv_curve most_recent_iv_curve)
         {
@@ -1186,6 +1280,7 @@ namespace QuadSMU_control
             Debug.Print("Data directory: {0}", iv_save_datadir);
 
             xrun_iv_button.IsEnabled = true;
+            xrun_iv_button_fr.IsEnabled = true;
 
         }
 
