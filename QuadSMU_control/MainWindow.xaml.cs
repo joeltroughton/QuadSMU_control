@@ -853,8 +853,15 @@ namespace QuadSMU_control
 
         }
 
+        private async void first_stability_measurement()
+        {
+            await run_scheduled_measurements().ConfigureAwait(false);
+        }
+
         private void run_stability_button(object sender, RoutedEventArgs e)
         {
+            first_stability_measurement();
+
             // Start timer
             if (!stability_active)
             {
