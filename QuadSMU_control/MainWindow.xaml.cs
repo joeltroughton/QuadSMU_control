@@ -553,10 +553,10 @@ namespace QuadSMU_control
             sp.WriteLine(send);
             await Task.Delay(5);
 
-            send = String.Format("CH{0}:MEA:VOL {1}", new_curve.smu_channel, new_curve.start_v);
+            send = String.Format("CH{0}:VOL {1}", new_curve.smu_channel, new_curve.start_v);
             sp.WriteLine(send);
             //await Task.Delay(50);
-            await Task.Delay(500); // QuadSMU slow
+            await Task.Delay(5); // QuadSMU slow
 
             send = String.Format("CH{0}:OSR {1}", new_curve.smu_channel, new_curve.osr);
             sp.WriteLine(send);
@@ -577,12 +577,37 @@ namespace QuadSMU_control
                     listen_for_data = false;
                     return;
                 }
-                send = String.Format("CH{0}:MEA:VOL {1:0.000}", new_curve.smu_channel, voltage);
+                // New single-shot paradigm: Set the level first and begin the measurment
+                // at the end of the wait cycle (from delay). Resolves slow amp slew rate 
+                // at high sinking currents
+
+                send = String.Format("CH{0}:VOL {1:0.000}", new_curve.smu_channel, voltage);
+
                 replyRecieved = false;
                 Debug.Print("Sending: {0}", send);
                 sp.WriteLine(send);
+
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
+                // Fudge-factor to correlate OSR to the amount of time a measurement
+                // is likely to take.
+                int approx_osr_added_delay = (27 * new_curve.osr) + 17;
+                int osr_adjusted_wait_time = new_curve.step_delay - approx_osr_added_delay;
+
+                if (osr_adjusted_wait_time < 0)
+                {
+                    osr_adjusted_wait_time = 1;
+                }
+
+                while (watch.ElapsedMilliseconds < osr_adjusted_wait_time)
+                {
+                    //Debug.Print("Waiting for step delay: {0}ms", watch.ElapsedMilliseconds);
+                    await Task.Delay(1);
+                }
+
+                send = String.Format("CH{0}:MEA:VOL {1:0.000}", new_curve.smu_channel, voltage);
+                Debug.Print("Sending: {0}", send);
+                sp.WriteLine(send);
 
                 while (!replyRecieved)
                 {
@@ -590,11 +615,7 @@ namespace QuadSMU_control
                     await Task.Delay(1);
                 }
 
-                while (watch.ElapsedMilliseconds < new_curve.step_delay)
-                {
-                    Debug.Print("Waiting for step delay: {0}ms", watch.ElapsedMilliseconds);
-                    await Task.Delay(1);
-                }
+
                 Debug.Print("Step delay condition met: {0}ms", watch.ElapsedMilliseconds);
                 watch.Stop();
                 replyRecieved = false;
@@ -771,7 +792,10 @@ namespace QuadSMU_control
                 jv_export(first_iv_output_path, first_single_jv);
                 add_iv_stats_to_csv(iv_save_datadir, first_single_jv);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(first_single_jv); xstop_iv_button.IsEnabled = false; xrun_iv_button.IsEnabled = true; });
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    updateDatagrid(first_single_jv);
+                });
 
 
                 await call_measurement(second_single_jv).ConfigureAwait(false);
@@ -779,7 +803,13 @@ namespace QuadSMU_control
                 jv_export(second_iv_output_path, second_single_jv);
                 add_iv_stats_to_csv(iv_save_datadir, second_single_jv);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate { updateDatagrid(second_single_jv); xstop_iv_button.IsEnabled = false; xrun_iv_button.IsEnabled = true; });
+                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    updateDatagrid(second_single_jv);
+                    xstop_iv_button.IsEnabled = false;
+                    xrun_iv_button.IsEnabled = true;
+                    xrun_iv_button_fr.IsEnabled = true;
+                });
 
             }
         }
@@ -1039,7 +1069,7 @@ namespace QuadSMU_control
                     stability_sweep_params.stability_irradience,
                     stability_sweep_params.ch4_polarity,
                     stability_sweep_params.ch4_hold_state);
-                
+
                 stability_currentcell_active_area = ch4_jv.active_area;
                 await call_measurement(ch4_jv).ConfigureAwait(false);
                 updateDatagrid(ch4_jv);

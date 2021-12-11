@@ -110,8 +110,8 @@
                         <TextBlock Grid.Row="0" Grid.Column="2" Text="Delay (ms)" Margin="5,0,0,0" ToolTip="The time between each measurement point"/>
                         <TextBlock Grid.Row="1" Grid.Column="2" Text="OSR" Margin="5,0,0,0" ToolTip="The number of oversamples measured for each point"/>
                         <TextBlock Grid.Row="2" Grid.Column="2" Text="I limit (mA)" Margin="5,0,0,0" ToolTip="The current limit in mA"/>
-                        <Fluent:Spinner x:Name="delay_time_ms" Grid.Row="0" Grid.Column="3" Format="0" Width="60" Increment="50" Value="50" Minimum="0" Maximum="5"/>
-                        <Fluent:Spinner x:Name="osr" Grid.Row="1" Grid.Column="3" Format="0" Width="60" Increment="1" Value="5" Minimum="1" Maximum="50"/>
+                        <Fluent:Spinner x:Name="delay_time_ms" Grid.Row="0" Grid.Column="3" Format="0" Width="60" Increment="50" Value="50" Minimum="20"/>
+                        <Fluent:Spinner x:Name="osr" Grid.Row="1" Grid.Column="3" Format="0" Width="60" Increment="1" Value="1" Minimum="1" Maximum="50"/>
                         <Fluent:Spinner x:Name="i_limit" Grid.Row="2" Grid.Column="3" Format="F1" Width="60" Increment="0.5" Value="40" Minimum="2" Maximum="40"/>
 
                         <!--<Fluent:TextBox Grid.Row="0" Grid.Column="3" x:Name="delay_time_ms" Width="50" Text="0"/>
